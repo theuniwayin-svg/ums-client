@@ -42,6 +42,7 @@ import {
 } from '@/components/leads/status-badges';
 import { EmptyState } from '@/components/empty-state';
 import { cn } from '@/lib/utils';
+import { LeadInfoEditor } from '@/components/leads/lead-info-editor';
 
 const STATUS_FLOW = [
   'New', 'Called', 'Interested', 'Follow Up', 'Admission Confirmed',
@@ -264,68 +265,12 @@ export default function LeadDetailPage() {
 
       {/* Info card */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Lead Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            {lead.email && (
-              <div>
-                <span className="text-gray-500">Email</span>
-                <p className="font-medium">{lead.email}</p>
-              </div>
-            )}
-            {lead.parentPhone && (
-              <div>
-                <span className="text-gray-500">Parent Phone</span>
-                <p className="font-medium font-mono">{lead.parentPhone}</p>
-              </div>
-            )}
-            {(lead.city || lead.state) && (
-              <div>
-                <span className="text-gray-500">Location</span>
-                <p className="font-medium">
-                  {[lead.city, lead.state].filter(Boolean).join(', ')}
-                </p>
-              </div>
-            )}
-            {lead.course && (
-              <div>
-                <span className="text-gray-500">Course</span>
-                <p className="font-medium">{lead.course}</p>
-              </div>
-            )}
-            {lead.preferredCollege && (
-              <div>
-                <span className="text-gray-500">Preferred College</span>
-                <p className="font-medium">{lead.preferredCollege}</p>
-              </div>
-            )}
-            <div>
-              <span className="text-gray-500">Source</span>
-              <p className="font-medium">
-                {lead.source}
-                {lead.otherSourceDescription &&
-                  ` — ${lead.otherSourceDescription}`}
-              </p>
-            </div>
-            <div>
-              <span className="text-gray-500">Created By</span>
-              <p className="font-medium">
-                {typeof lead.createdBy === 'object'
-                  ? lead.createdBy.name
-                  : lead.createdBy}
-              </p>
-            </div>
-            <div>
-              <span className="text-gray-500">Assigned To</span>
-              <p className="font-medium">
-                {typeof lead.assignedTo === 'object'
-                  ? lead.assignedTo.name
-                  : lead.assignedTo || 'Unassigned'}
-              </p>
-            </div>
-          </div>
+        <CardContent className="pt-6">
+          <LeadInfoEditor
+            lead={lead}
+            title="Lead Information"
+            description="Edit the lead profile and keep the activity trail in sync."
+          />
         </CardContent>
       </Card>
 

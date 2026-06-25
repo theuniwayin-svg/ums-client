@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
+import { LeadInfoEditor } from '@/components/leads/lead-info-editor';
 import {
   useLead,
   useUpdateLeadStatus,
@@ -97,11 +98,12 @@ export function QuickEditDrawer({ open, leadId, onClose }: QuickEditDrawerProps)
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Lead info */}
-              <div>
-                <h3 className="font-semibold text-gray-900">{lead.studentName}</h3>
-                <p className="text-sm text-gray-500 font-mono">{lead.phone}</p>
-              </div>
+              <LeadInfoEditor
+                lead={lead}
+                layout="compact"
+                title="Lead Information"
+                description="Edit the core fields without leaving quick edit."
+              />
 
               {/* Status */}
               <div>
