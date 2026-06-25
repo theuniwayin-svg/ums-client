@@ -31,6 +31,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   Table,
   TableBody,
   TableCell,
@@ -58,6 +66,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { useUsers } from '@/hooks/use-admin';
 import { useBulkAssignLeads } from '@/hooks/use-leads';
 import { CollegePicker } from '@/components/college-picker';
+import { SHORTCUT_GROUPS } from '@/lib/keyboard-shortcuts';
 
 const STATUS_OPTIONS = [
   'New', 'Called', 'Interested', 'Follow Up',
@@ -97,6 +106,7 @@ export default function LeadsPage() {
   const [collegeValue, setCollegeValue] = useState(activeFilters.preferredCollege || '');
   const [assignedToValue, setAssignedToValue] = useState(activeFilters.assignedTo || '');
   const [assigneeId, setAssigneeId] = useState('');
+  const [isShortcutHelpOpen, setIsShortcutHelpOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState(activeFilters.sortBy || 'updatedAt');
   const [sortOrder, setSortOrder] = useState(activeFilters.order || 'desc');
@@ -203,12 +213,45 @@ export default function LeadsPage() {
     clearFilters();
   };
 
+  const visibleLeadIds = leads.map((lead) => lead._id);
+
+  const getFocusedLeadIndex = () => {
+    if (visibleLeadIds.length === 0) return -1;
+
+    const selectedLeadId = selectedRows[0];
+    const selectedIndex = visibleLeadIds.findIndex((leadId) => leadId === selectedLeadId);
+    return selectedIndex >= 0 ? selectedIndex : 0;
+  };
+
+  const focusLeadByIndex = useCallback((index: number) => {
+    if (visibleLeadIds.length === 0) return;
+
+    const nextIndex = Math.max(0, Math.min(index, visibleLeadIds.length - 1));
+    setSelectedRows([visibleLeadIds[nextIndex]]);
+  }, [setSelectedRows, visibleLeadIds]);
+
+  const openFocusedLead = useCallback(() => {
+    if (visibleLeadIds.length === 0) return;
+
+    const focusedIndex = getFocusedLeadIndex();
+    const leadId = focusedIndex >= 0 ? visibleLeadIds[focusedIndex] : visibleLeadIds[0];
+    if (leadId) {
+      router.push(`/leads/${leadId}`);
+    }
+  }, [router, visibleLeadIds, selectedRows]);
+
   useKeyboardShortcuts({
     n: openCreateLead,
     '/': () => document.getElementById('search-input')?.focus(),
+    '?': () => setIsShortcutHelpOpen(true),
+    c: handleClearFilters,
+    j: () => focusLeadByIndex(getFocusedLeadIndex() + 1),
+    k: () => focusLeadByIndex(getFocusedLeadIndex() - 1),
+    Enter: openFocusedLead,
     Escape: () => {
       closeCreateLead();
       closeQuickEdit();
+      setIsShortcutHelpOpen(false);
     },
   });
 
@@ -730,6 +773,45 @@ export default function LeadsPage() {
         leadId={quickEditLeadId}
         onClose={closeQuickEdit}
       />
+      <Dialog open={isShortcutHelpOpen} onOpenChange={setIsShortcutHelpOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Keyboard shortcuts</DialogTitle>
+            <DialogDescription>
+              Fast actions for navigating the leads page.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 text-sm">
+            {SHORTCUT_GROUPS.map((group) => (
+              <div key={group.title} className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  {group.title}
+                </p>
+                <div className="grid gap-2 md:grid-cols-2">
+                  {group.items
+                    .filter((item) => item.context === 'Everywhere' || item.context === 'Leads page')
+                    .map((item) => (
+                      <div key={`${group.title}-${item.key}`} className="flex items-start justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                        <div>
+                          <p className="font-medium text-gray-900">{item.description}</p>
+                          <p className="text-xs text-gray-500">{item.context}</p>
+                        </div>
+                        <kbd className="rounded border border-gray-200 bg-white px-2 py-0.5 font-mono text-xs">
+                          {item.key}
+                        </kbd>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsShortcutHelpOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Keyboard shortcut hint */}
       <div className="fixed bottom-6 right-6 text-xs text-gray-400">

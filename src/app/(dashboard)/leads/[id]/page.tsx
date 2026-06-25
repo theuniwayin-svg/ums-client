@@ -8,6 +8,17 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
@@ -43,13 +54,16 @@ import {
 import { EmptyState } from '@/components/empty-state';
 import { cn } from '@/lib/utils';
 import { LeadInfoEditor } from '@/components/leads/lead-info-editor';
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useAuthStore } from '@/store/auth.store';
+import { SHORTCUT_GROUPS } from '@/lib/keyboard-shortcuts';
 
 const STATUS_FLOW = [
   'New', 'Called', 'Interested', 'Follow Up', 'Admission Confirmed',
 ];
 const EXIT_STATUSES = ['Not Interested', 'Closed'];
 const TEMPERATURE_OPTIONS = ['Hot', 'Warm', 'Cold'];
+const FOLLOW_UP_TYPES = ['Call', 'Documents Pending', 'Parent Callback', 'General'];
 const ACTIVITY_ICONS: Record<string, string> = {
   LEAD_CREATED: '➕',
   STATUS_CHANGED: '🔄',
@@ -99,6 +113,15 @@ export default function LeadDetailPage() {
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
   const [newNote, setNewNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
+  const [isShortcutHelpOpen, setIsShortcutHelpOpen] = useState(false);
+  const [followUpType, setFollowUpType] = useState(FOLLOW_UP_TYPES[0]);
+  const [followUpScheduledFor, setFollowUpScheduledFor] = useState(() => {
+    const nextHour = new Date(Date.now() + 60 * 60 * 1000);
+    const offset = nextHour.getTimezoneOffset() * 60000;
+    return new Date(nextHour.getTime() - offset).toISOString().slice(0, 16);
+  });
+  const [followUpNote, setFollowUpNote] = useState('');
 
   const { data: lead, isLoading } = useLead(id);
   const { data: activitiesPages, fetchNextPage, hasNextPage } = useLeadActivities(id);
@@ -109,6 +132,7 @@ export default function LeadDetailPage() {
   const updateLeadTemperature = useUpdateLeadTemperature(id);
   const closeLead = useCloseLead();
   const createNote = useCreateNote(id);
+  const createFollowUp = useCreateFollowUp(id);
   const completeFollowUp = useCompleteFollowUp(id);
 
   const activities = useMemo(() => {
@@ -173,6 +197,33 @@ export default function LeadDetailPage() {
     }
   };
 
+  const handleCreateFollowUp = async () => {
+    try {
+      await createFollowUp.mutateAsync({
+        type: followUpType,
+        scheduledFor: new Date(followUpScheduledFor).toISOString(),
+        note: followUpNote.trim() || undefined,
+      });
+      toast.success('Follow-up scheduled');
+      setIsFollowUpOpen(false);
+      setFollowUpNote('');
+    } catch {
+      toast.error('Failed to schedule follow-up');
+    }
+  };
+
+  useKeyboardShortcuts(
+    {
+      f: () => setIsFollowUpOpen(true),
+      '?': () => setIsShortcutHelpOpen(true),
+      Escape: () => {
+        setIsFollowUpOpen(false);
+        setIsShortcutHelpOpen(false);
+      },
+    },
+    !!lead,
+  );
+
   if (isLoading || !lead) {
     return (
       <div className="space-y-4 max-w-4xl mx-auto">
@@ -198,6 +249,9 @@ export default function LeadDetailPage() {
           <p className="text-gray-500 font-mono">{lead.phone}</p>
         </div>
         <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={() => setIsFollowUpOpen(true)}>
+            Schedule Follow-up
+          </Button>
           <TemperatureBadge temperature={lead.temperature} />
           <AlertDialog>
             <AlertDialogTrigger render={<Button variant="destructive" size="sm">Close Lead</Button>} />
@@ -365,6 +419,105 @@ export default function LeadDetailPage() {
         {/* Activity Timeline */}
         <Card>
           <CardHeader>
+
+      <Dialog open={isFollowUpOpen} onOpenChange={setIsFollowUpOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Schedule follow-up</DialogTitle>
+            <DialogDescription>
+              Create a reminder for this lead. It will show up on the follow-ups page.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Type</Label>
+              <Select value={followUpType} onValueChange={setFollowUpType}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select follow-up type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FOLLOW_UP_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="follow-up-scheduled-for">Date and time</Label>
+              <Input
+                id="follow-up-scheduled-for"
+                type="datetime-local"
+                value={followUpScheduledFor}
+                onChange={(event) => setFollowUpScheduledFor(event.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="follow-up-note">Note</Label>
+              <Textarea
+                id="follow-up-note"
+                value={followUpNote}
+                onChange={(event) => setFollowUpNote(event.target.value)}
+                rows={3}
+                placeholder="Optional reminder note"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsFollowUpOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-indigo-600 hover:bg-indigo-700"
+              onClick={handleCreateFollowUp}
+              disabled={createFollowUp.isPending}
+            >
+              Save follow-up
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isShortcutHelpOpen} onOpenChange={setIsShortcutHelpOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Keyboard shortcuts</DialogTitle>
+            <DialogDescription>
+              Quick actions for the lead detail screen.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 text-sm">
+            {SHORTCUT_GROUPS.map((group) => (
+              <div key={group.title} className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  {group.title}
+                </p>
+                <div className="grid gap-2 md:grid-cols-2">
+                  {group.items
+                    .filter((item) => item.context === 'Everywhere' || item.context === 'Lead detail page')
+                    .map((item) => (
+                      <div key={`${group.title}-${item.key}`} className="flex items-start justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                        <div>
+                          <p className="font-medium text-gray-900">{item.description}</p>
+                          <p className="text-xs text-gray-500">{item.context}</p>
+                        </div>
+                        <kbd className="rounded border border-gray-200 bg-white px-2 py-0.5 font-mono text-xs">
+                          {item.key}
+                        </kbd>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsShortcutHelpOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
             <CardTitle className="text-base">Activity Timeline</CardTitle>
           </CardHeader>
           <CardContent>

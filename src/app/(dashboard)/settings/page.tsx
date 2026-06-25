@@ -3,6 +3,7 @@
 import { useAuthStore } from '@/store/auth.store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { SHORTCUT_GROUPS } from '@/lib/keyboard-shortcuts';
 
 export default function SettingsPage() {
   const { user } = useAuthStore();
@@ -36,21 +37,25 @@ export default function SettingsPage() {
           <CardTitle className="text-base">Keyboard Shortcuts</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2 text-sm">
-            {[
-              ['N', 'New Lead'],
-              ['/', 'Focus Search'],
-              ['Esc', 'Close Modal'],
-              ['J', 'Next Lead'],
-              ['K', 'Previous Lead'],
-              ['Enter', 'Open Lead'],
-              ['F', 'Schedule Follow-up'],
-            ].map(([key, desc]) => (
-              <div key={key} className="flex items-center justify-between">
-                <span className="text-gray-600">{desc}</span>
-                <kbd className="px-2 py-0.5 bg-gray-100 rounded text-xs font-mono">
-                  {key}
-                </kbd>
+          <div className="space-y-4 text-sm">
+            {SHORTCUT_GROUPS.map((group) => (
+              <div key={group.title} className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  {group.title}
+                </p>
+                <div className="space-y-2">
+                  {group.items.map((item) => (
+                    <div key={`${group.title}-${item.key}`} className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-gray-600">{item.description}</p>
+                        <p className="text-xs text-gray-400">{item.context}</p>
+                      </div>
+                      <kbd className="px-2 py-0.5 bg-gray-100 rounded text-xs font-mono">
+                        {item.key}
+                      </kbd>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>

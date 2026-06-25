@@ -23,7 +23,10 @@ export function useKeyboardShortcuts(
         return;
       }
 
-      const handler = shortcuts[event.key];
+      const normalizedKey = event.key.length === 1
+        ? event.key.toLowerCase()
+        : event.key.toLowerCase();
+      const handler = shortcuts[event.key] || shortcuts[normalizedKey];
       if (handler) {
         event.preventDefault();
         handler();
