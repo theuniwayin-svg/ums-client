@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -76,7 +76,17 @@ export default function LeadDetailPage() {
   const createNote = useCreateNote(id);
   const completeFollowUp = useCompleteFollowUp(id);
 
-  const activities = activitiesPages?.pages.flatMap((p: any) => p?.data || p) || [];
+  const activities = useMemo(() => {
+    const allActivities = activitiesPages?.pages.flatMap((p: any) => p?.data || p) || [];
+    const seen = new Set<string>();
+    return allActivities.filter((activity: any) => {
+      if (!activity?._id || seen.has(activity._id)) {
+        return false;
+      }
+      seen.add(activity._id);
+      return true;
+    });
+  }, [activitiesPages]);
 
   const handleStatusChange = async (status: string) => {
     if (!lead) return;

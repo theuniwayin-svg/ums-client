@@ -101,6 +101,9 @@ export function useUpdateLead(leadId: string) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.leads.detail(leadId),
       });
+      queryClient.invalidateQueries({
+        queryKey: ['leads', leadId, 'activities'],
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.leads.all });
     },
   });
