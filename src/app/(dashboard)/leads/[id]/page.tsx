@@ -24,7 +24,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import {
   useLead,
-  useUpdateLead,
+  useUpdateLeadStatus,
+  useUpdateLeadTemperature,
   useCloseLead,
   useLeadActivities,
   useLeadNotes,
@@ -71,7 +72,8 @@ export default function LeadDetailPage() {
   const { data: notes } = useLeadNotes(id);
   const { data: followUps } = useLeadFollowUps(id);
 
-  const updateLead = useUpdateLead(id);
+  const updateLeadStatus = useUpdateLeadStatus(id);
+  const updateLeadTemperature = useUpdateLeadTemperature(id);
   const closeLead = useCloseLead();
   const createNote = useCreateNote(id);
   const completeFollowUp = useCompleteFollowUp(id);
@@ -92,7 +94,7 @@ export default function LeadDetailPage() {
     if (!lead) return;
     try {
       setIsSaving(true);
-      await updateLead.mutateAsync({ version: lead.version, status });
+      await updateLeadStatus.mutateAsync({ version: lead.version, status });
       toast.success(`Status → ${status}`);
     } catch (err: any) {
       if (err.response?.data?.error?.code === 'VERSION_CONFLICT') {
@@ -110,7 +112,7 @@ export default function LeadDetailPage() {
   const handleTemperatureChange = async (temperature: string) => {
     if (!lead) return;
     try {
-      await updateLead.mutateAsync({ version: lead.version, temperature });
+      await updateLeadTemperature.mutateAsync({ version: lead.version, temperature });
       toast.success(`Temperature → ${temperature}`);
     } catch {
       toast.error('Failed to update temperature');

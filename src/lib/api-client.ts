@@ -113,6 +113,10 @@ export const api = {
     create: (data: unknown) => apiClient.post('/leads', data),
     update: (id: string, data: unknown) =>
       apiClient.patch(`/leads/${id}`, data),
+    updateStatus: (id: string, data: unknown) =>
+      apiClient.patch(`/leads/${id}/status`, data),
+    updateTemperature: (id: string, data: unknown) =>
+      apiClient.patch(`/leads/${id}/temperature`, data),
     close: (id: string) => apiClient.patch(`/leads/${id}/close`),
     delete: (id: string) => apiClient.delete(`/leads/${id}`),
     bulkUpdate: (data: unknown) => apiClient.patch('/leads/bulk', data),

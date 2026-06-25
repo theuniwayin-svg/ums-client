@@ -109,6 +109,40 @@ export function useUpdateLead(leadId: string) {
   });
 }
 
+export function useUpdateLeadStatus(leadId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { version: number; status: string }) =>
+      api.leads.updateStatus(leadId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.leads.detail(leadId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['leads', leadId, 'activities'],
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.leads.all });
+    },
+  });
+}
+
+export function useUpdateLeadTemperature(leadId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { version: number; temperature: string }) =>
+      api.leads.updateTemperature(leadId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.leads.detail(leadId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['leads', leadId, 'activities'],
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.leads.all });
+    },
+  });
+}
+
 export function useCloseLead() {
   const queryClient = useQueryClient();
   return useMutation({

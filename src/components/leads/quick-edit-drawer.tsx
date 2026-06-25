@@ -13,7 +13,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useLead, useUpdateLead, useCreateNote } from '@/hooks/use-leads';
+import {
+  useLead,
+  useUpdateLeadStatus,
+  useUpdateLeadTemperature,
+  useCreateNote,
+} from '@/hooks/use-leads';
 import { StatusBadge, TemperatureBadge } from './status-badges';
 
 const STATUS_OPTIONS = [
@@ -30,7 +35,8 @@ interface QuickEditDrawerProps {
 
 export function QuickEditDrawer({ open, leadId, onClose }: QuickEditDrawerProps) {
   const { data: lead, isLoading } = useLead(leadId || '');
-  const updateLead = useUpdateLead(leadId || '');
+  const updateLeadStatus = useUpdateLeadStatus(leadId || '');
+  const updateLeadTemperature = useUpdateLeadTemperature(leadId || '');
   const createNote = useCreateNote(leadId || '');
   const [note, setNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -39,7 +45,7 @@ export function QuickEditDrawer({ open, leadId, onClose }: QuickEditDrawerProps)
     if (!lead) return;
     try {
       setIsSaving(true);
-      await updateLead.mutateAsync({ version: lead.version, status });
+      await updateLeadStatus.mutateAsync({ version: lead.version, status });
       toast.success('Status updated');
     } catch {
       toast.error('Failed to update status');
@@ -52,7 +58,7 @@ export function QuickEditDrawer({ open, leadId, onClose }: QuickEditDrawerProps)
     if (!lead) return;
     try {
       setIsSaving(true);
-      await updateLead.mutateAsync({ version: lead.version, temperature });
+      await updateLeadTemperature.mutateAsync({ version: lead.version, temperature });
       toast.success('Temperature updated');
     } catch {
       toast.error('Failed to update temperature');
