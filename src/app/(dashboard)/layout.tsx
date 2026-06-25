@@ -18,6 +18,8 @@ import { useAuthStore } from '@/store/auth.store';
 import { api } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { usePendingFollowUps } from '@/hooks/use-leads';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { Menu, X } from 'lucide-react';
 
 const navItems = [
   { href: '/leads', label: 'Leads', icon: '👥' },
@@ -58,28 +60,28 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
+    <div className="flex h-screen bg-background text-foreground">
+      {/* Sidebar - Hidden on mobile, visible on desktop */}
       <aside
         className={cn(
-          'flex flex-col bg-white border-r border-gray-200 transition-all duration-300',
-          sidebarOpen ? 'w-64' : 'w-16',
+          'fixed md:relative z-40 flex flex-col bg-card border-r border-border transition-all duration-300 h-full',
+          sidebarOpen ? 'w-64' : 'w-16 max-md:hidden',
         )}
       >
         {/* Logo */}
-        <div className="flex items-center h-16 px-4 border-b border-gray-200">
-          <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-sm">U</span>
+        <div className="flex items-center h-16 px-4 border-b border-border">
+          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+            <span className="text-primary-foreground font-bold text-sm">U</span>
           </div>
           {sidebarOpen && (
-            <span className="ml-3 font-semibold text-gray-900 truncate">
+            <span className="ml-3 font-semibold text-foreground truncate">
               Uniwayin UMS
             </span>
           )}
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -87,8 +89,8 @@ export default function DashboardLayout({
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                 pathname.startsWith(item.href)
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
               )}
             >
               <span className="text-base flex-shrink-0">{item.icon}</span>
@@ -109,7 +111,7 @@ export default function DashboardLayout({
           {isAdmin && (
             <div className={sidebarOpen ? 'pt-4' : 'pt-2'}>
               {sidebarOpen && (
-                <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   Admin
                 </p>
               )}
@@ -120,8 +122,8 @@ export default function DashboardLayout({
                   className={cn(
                     'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                     pathname.startsWith(item.href)
-                      ? 'bg-indigo-50 text-indigo-700'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                   )}
                 >
                   <span className="text-base flex-shrink-0">{item.icon}</span>
@@ -133,20 +135,20 @@ export default function DashboardLayout({
         </nav>
 
         {/* Bottom */}
-        <div className="border-t border-gray-200 p-3">
+        <div className="border-t border-border p-3 space-y-3">
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm hover:bg-gray-100 transition-colors">
-              <div className="h-7 w-7 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-indigo-700 font-semibold text-xs">
+            <DropdownMenuTrigger className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors">
+              <div className="h-7 w-7 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-primary font-semibold text-xs">
                   {user?.name?.[0]?.toUpperCase() || 'U'}
                 </span>
               </div>
               {sidebarOpen && (
                 <div className="flex-1 text-left min-w-0">
-                  <p className="font-medium text-gray-900 truncate">
+                  <p className="font-medium text-foreground truncate">
                     {user?.name || 'User'}
                   </p>
-                  <p className="text-xs text-gray-500 truncate capitalize">
+                  <p className="text-xs text-muted-foreground truncate capitalize">
                     {user?.role}
                   </p>
                 </div>
@@ -157,7 +159,7 @@ export default function DashboardLayout({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleLogout}
-                className="text-red-600"
+                className="text-destructive"
               >
                 Sign out
               </DropdownMenuItem>
@@ -167,45 +169,51 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden md:ml-0">
         {/* Topbar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center px-6 flex-shrink-0">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 mr-4"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+        <header className="h-14 md:h-16 bg-card border-b border-border flex items-center px-4 md:px-6 flex-shrink-0">
+          <div className="flex items-center gap-2 md:gap-4 w-full">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 rounded-lg hover:bg-muted text-foreground md:hidden"
+              title={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
-          <div className="flex-1" />
+              {sidebarOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </button>
+            <div className="flex-1" />
+            <ThemeToggle />
+          </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto p-6">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+        <main className="flex-1 overflow-auto bg-background">
+          <div className="p-4 md:p-6 max-w-7xl mx-auto">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={pathname}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </main>
       </div>
+
+      {/* Mobile sidebar backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 md:hidden z-30"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
     </div>
   );
 }

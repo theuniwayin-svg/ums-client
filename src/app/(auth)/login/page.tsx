@@ -56,12 +56,12 @@ export default function LoginPage() {
       transition={{ duration: 0.4 }}
       className="w-full max-w-md px-4"
     >
-      <Card className="shadow-lg">
+      <Card className="shadow-soft border border-border">
         <CardHeader className="text-center pb-2">
-          <div className="mx-auto mb-4 h-12 w-12 rounded-xl bg-indigo-600 flex items-center justify-center">
-            <span className="text-white font-bold text-xl">U</span>
+          <div className="mx-auto mb-4 h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
+            <span className="text-primary-foreground font-bold text-xl">U</span>
           </div>
-          <CardTitle className="text-2xl font-bold">Uniwayin UMS</CardTitle>
+          <CardTitle className="text-2xl font-bold text-foreground">Uniwayin UMS</CardTitle>
           <CardDescription>Sign in to manage your leads</CardDescription>
         </CardHeader>
         <CardContent>
@@ -81,7 +81,7 @@ export default function LoginPage() {
                 {...register('email')}
               />
               {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
+                <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -94,7 +94,7 @@ export default function LoginPage() {
                 {...register('password')}
               />
               {errors.password && (
-                <p className="text-sm text-red-500">
+                <p className="text-sm text-destructive">
                   {errors.password.message}
                 </p>
               )}

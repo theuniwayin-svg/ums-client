@@ -303,7 +303,7 @@ export default function LeadsPage() {
       accessorKey: 'studentName',
       header: 'Student Name',
       cell: ({ row }) => (
-        <div className="font-medium text-gray-900">
+        <div className="font-medium text-foreground">
           {row.original.studentName}
         </div>
       ),
@@ -312,7 +312,7 @@ export default function LeadsPage() {
       accessorKey: 'phone',
       header: 'Phone',
       cell: ({ row }) => (
-        <span className="text-gray-600 font-mono text-sm">
+        <span className="text-muted-foreground font-mono text-sm">
           {row.original.phone}
         </span>
       ),
@@ -333,7 +333,7 @@ export default function LeadsPage() {
       accessorKey: 'source',
       header: 'Source',
       cell: ({ row }) => (
-        <span className="text-gray-600 text-sm">{row.original.source}</span>
+        <span className="text-muted-foreground text-sm">{row.original.source}</span>
       ),
     },
     {
@@ -349,7 +349,7 @@ export default function LeadsPage() {
       cell: ({ row }) => {
         const cb = row.original.createdBy;
         const name = typeof cb === 'object' ? cb?.name : '—';
-        return <span className="text-gray-500 text-sm">{name}</span>;
+        return <span className="text-muted-foreground text-sm">{name}</span>;
       },
     },
     {
@@ -358,7 +358,7 @@ export default function LeadsPage() {
       cell: ({ row }) => {
         const assignedTo = row.original.assignedTo;
         const name = typeof assignedTo === 'object' ? assignedTo?.name : '—';
-        return <span className="text-gray-500 text-sm">{name}</span>;
+        return <span className="text-muted-foreground text-sm">{name}</span>;
       },
     },
     {
@@ -403,27 +403,28 @@ export default function LeadsPage() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Leads</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Leads</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             {meta.total} total leads
           </p>
         </div>
         <Button
           onClick={openCreateLead}
-          className="bg-indigo-600 hover:bg-indigo-700"
+          variant="default"
+          size="default"
         >
           + Add Lead
         </Button>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
-        <div className="border-b border-gray-100 px-4 py-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="bg-card rounded-2xl border border-border shadow-soft">
+        <div className="border-b border-border px-4 py-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-semibold text-gray-900">Search and sort</p>
-            <p className="text-xs text-gray-500">Find leads quickly, then narrow by status, source, or college.</p>
+            <p className="text-sm font-semibold text-foreground">Search and sort</p>
+            <p className="text-xs text-muted-foreground">Find leads quickly, then narrow by status, source, or college.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {(activeFilters.status ||
@@ -460,9 +461,9 @@ export default function LeadsPage() {
         </div>
 
         <div className="px-4 py-4 space-y-4">
-          <div className="grid gap-4 lg:grid-cols-12">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12">
             <div className="space-y-1.5 lg:col-span-4">
-              <Label htmlFor="search-input" className="text-xs uppercase tracking-wide text-gray-500">
+              <Label htmlFor="search-input" className="text-xs uppercase tracking-wide text-muted-foreground">
                 Search
               </Label>
               <Input
@@ -471,11 +472,11 @@ export default function LeadsPage() {
                 value={searchValue}
                 onChange={handleSearchChange}
               />
-              <p className="text-xs text-gray-500">Search runs across student, phone, email, and college fields.</p>
+              <p className="text-xs text-muted-foreground">Search runs across student, phone, email, and college fields.</p>
             </div>
 
-            <div className="space-y-1.5 lg:col-span-3">
-              <Label className="text-xs uppercase tracking-wide text-gray-500">
+            <div className="space-y-1.5 md:col-span-1 lg:col-span-3">
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
                 College
               </Label>
               <CollegePicker
@@ -483,12 +484,12 @@ export default function LeadsPage() {
                 onValueChange={handleCollegeChange}
                 placeholder={COLLEGE_QUERY_PLACEHOLDER}
               />
-              <p className="text-xs text-gray-500">Type to filter by any existing college name.</p>
+              <p className="text-xs text-muted-foreground">Type to filter by any existing college name.</p>
             </div>
 
             {isAdmin && (
-              <div className="space-y-1.5 lg:col-span-3">
-                <Label className="text-xs uppercase tracking-wide text-gray-500">
+              <div className="space-y-1.5 md:col-span-1 lg:col-span-3">
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">
                   Assigned to
                 </Label>
                 <Select
@@ -511,8 +512,8 @@ export default function LeadsPage() {
               </div>
             )}
 
-            <div className="space-y-1.5 lg:col-span-2">
-              <Label className="text-xs uppercase tracking-wide text-gray-500">
+            <div className="space-y-1.5 md:col-span-1 lg:col-span-2">
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
                 Status
               </Label>
               <Select
@@ -529,11 +530,11 @@ export default function LeadsPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-gray-500">Pipeline stage for the lead.</p>
+              <p className="text-xs text-muted-foreground">Pipeline stage for the lead.</p>
             </div>
 
-            <div className="space-y-1.5 lg:col-span-1">
-              <Label className="text-xs uppercase tracking-wide text-gray-500">
+            <div className="space-y-1.5 md:col-span-1 lg:col-span-1">
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
                 Temp
               </Label>
               <Select
@@ -550,11 +551,11 @@ export default function LeadsPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-gray-500">Lead interest level.</p>
+              <p className="text-xs text-muted-foreground">Lead interest level.</p>
             </div>
 
-            <div className="space-y-1.5 lg:col-span-1">
-              <Label className="text-xs uppercase tracking-wide text-gray-500">
+            <div className="space-y-1.5 md:col-span-1 lg:col-span-1">
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
                 Source
               </Label>
               <Select
@@ -571,11 +572,11 @@ export default function LeadsPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-gray-500">Original lead source.</p>
+              <p className="text-xs text-muted-foreground">Original lead source.</p>
             </div>
 
-            <div className="space-y-1.5 lg:col-span-2">
-              <Label className="text-xs uppercase tracking-wide text-gray-500">
+            <div className="space-y-1.5 md:col-span-1 lg:col-span-2">
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
                 Sort by
               </Label>
               <Select value={sortBy} onValueChange={(value) => handleSortChange(value, sortOrder)}>
@@ -606,32 +607,32 @@ export default function LeadsPage() {
                   <SelectItem value="asc">Oldest first</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-gray-500">Ascending or descending.</p>
+              <p className="text-xs text-muted-foreground">Ascending or descending.</p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
-            <span className="font-medium text-gray-700">Active filters:</span>
-            {activeFilters.status && <span className="rounded-full bg-gray-100 px-3 py-1">Status: {activeFilters.status}</span>}
-            {activeFilters.temperature && <span className="rounded-full bg-gray-100 px-3 py-1">Temp: {activeFilters.temperature}</span>}
-            {activeFilters.source && <span className="rounded-full bg-gray-100 px-3 py-1">Source: {activeFilters.source}</span>}
-            {activeFilters.q && <span className="rounded-full bg-gray-100 px-3 py-1">Search: {activeFilters.q}</span>}
-            {activeFilters.preferredCollege && <span className="rounded-full bg-gray-100 px-3 py-1">College: {activeFilters.preferredCollege}</span>}
-            {activeFilters.assignedTo && <span className="rounded-full bg-gray-100 px-3 py-1">Assigned to: {staffUsers.find((staff: any) => staff._id === activeFilters.assignedTo)?.name || 'Selected staff'}</span>}
-            <span className="rounded-full bg-indigo-50 px-3 py-1 text-indigo-700">Sort: {sortBy} · {sortOrder}</span>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">Active filters:</span>
+            {activeFilters.status && <span className="rounded-full bg-muted px-3 py-1">Status: {activeFilters.status}</span>}
+            {activeFilters.temperature && <span className="rounded-full bg-muted px-3 py-1">Temp: {activeFilters.temperature}</span>}
+            {activeFilters.source && <span className="rounded-full bg-muted px-3 py-1">Source: {activeFilters.source}</span>}
+            {activeFilters.q && <span className="rounded-full bg-muted px-3 py-1">Search: {activeFilters.q}</span>}
+            {activeFilters.preferredCollege && <span className="rounded-full bg-muted px-3 py-1">College: {activeFilters.preferredCollege}</span>}
+            {activeFilters.assignedTo && <span className="rounded-full bg-muted px-3 py-1">Assigned to: {staffUsers.find((staff: any) => staff._id === activeFilters.assignedTo)?.name || 'Selected staff'}</span>}
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-primary">Sort: {sortBy} · {sortOrder}</span>
           </div>
         </div>
       </div>
 
       {/* Bulk actions bar */}
       {selectedRows.length > 0 && (
-        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3">
-          <span className="text-sm font-medium text-indigo-700">
+        <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+          <span className="text-sm font-medium text-primary">
             {selectedRows.length} selected
           </span>
-          <div className="w-40">
+          <div className="w-full sm:w-40">
             <Select onValueChange={handleBulkStatusChange}>
-              <SelectTrigger className="w-full h-9 text-xs bg-white">
+              <SelectTrigger className="w-full h-9 text-xs">
                 <SelectValue placeholder="Bulk status" />
               </SelectTrigger>
               <SelectContent>
@@ -643,9 +644,9 @@ export default function LeadsPage() {
           </div>
           {isAdmin && (
             <>
-              <div className="w-52">
+              <div className="w-full sm:w-52">
                 <Select value={assigneeId} onValueChange={setAssigneeId}>
-                  <SelectTrigger className="w-full h-9 text-xs bg-white">
+                  <SelectTrigger className="w-full h-9 text-xs">
                     <SelectValue placeholder="Assign to staff" />
                   </SelectTrigger>
                   <SelectContent>
@@ -661,7 +662,6 @@ export default function LeadsPage() {
                 size="sm"
                 onClick={handleBulkAssign}
                 disabled={!assigneeId || bulkAssign.isPending}
-                className="bg-indigo-600 hover:bg-indigo-700"
               >
                 Assign
               </Button>
@@ -671,7 +671,7 @@ export default function LeadsPage() {
             variant="ghost"
             size="sm"
             onClick={clearSelectedRows}
-            className="text-xs text-gray-500"
+            className="text-xs"
           >
             Clear
           </Button>
@@ -679,7 +679,7 @@ export default function LeadsPage() {
       )}
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
         {isLoading ? (
           <div className="space-y-3 p-4">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -697,11 +697,11 @@ export default function LeadsPage() {
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="bg-gray-50">
+                <TableRow key={headerGroup.id} className="bg-muted/50 border-b border-border">
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="text-xs font-semibold uppercase text-gray-500"
+                      className="text-xs font-semibold uppercase text-muted-foreground"
                     >
                       {flexRender(
                         header.column.columnDef.header,
@@ -719,13 +719,13 @@ export default function LeadsPage() {
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.03, duration: 0.2 }}
-                  className={`cursor-pointer border-l-4 transition-colors hover:bg-gray-50 ${temperatureBorderClass(
+                  className={`cursor-pointer border-l-4 transition-colors hover:bg-muted/50 ${temperatureBorderClass(
                     row.original.temperature,
                   )}`}
                   onClick={() => router.push(`/leads/${row.original._id}`)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3 text-sm">
+                    <td key={cell.id} className="px-3 sm:px-4 py-3 text-xs sm:text-sm">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -741,16 +741,17 @@ export default function LeadsPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
             Page {page} of {totalPages} · {meta.total} leads
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
               size="sm"
               disabled={page === 1}
               onClick={() => setPage((p) => p - 1)}
+              className="flex-1 sm:flex-none"
             >
               ← Prev
             </Button>
@@ -759,6 +760,7 @@ export default function LeadsPage() {
               size="sm"
               disabled={page >= totalPages}
               onClick={() => setPage((p) => p + 1)}
+              className="flex-1 sm:flex-none"
             >
               Next →
             </Button>
@@ -784,19 +786,19 @@ export default function LeadsPage() {
           <div className="space-y-4 text-sm">
             {SHORTCUT_GROUPS.map((group) => (
               <div key={group.title} className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {group.title}
                 </p>
                 <div className="grid gap-2 md:grid-cols-2">
                   {group.items
                     .filter((item) => item.context === 'Everywhere' || item.context === 'Leads page')
                     .map((item) => (
-                      <div key={`${group.title}-${item.key}`} className="flex items-start justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                      <div key={`${group.title}-${item.key}`} className="flex items-start justify-between gap-3 rounded-lg border border-border bg-muted/50 px-3 py-2">
                         <div>
-                          <p className="font-medium text-gray-900">{item.description}</p>
-                          <p className="text-xs text-gray-500">{item.context}</p>
+                          <p className="font-medium text-foreground">{item.description}</p>
+                          <p className="text-xs text-muted-foreground">{item.context}</p>
                         </div>
-                        <kbd className="rounded border border-gray-200 bg-white px-2 py-0.5 font-mono text-xs">
+                        <kbd className="rounded border border-border bg-card px-2 py-0.5 font-mono text-xs">
                           {item.key}
                         </kbd>
                       </div>
