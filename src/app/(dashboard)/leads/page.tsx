@@ -11,8 +11,10 @@ import {
   SortingState,
   VisibilityState,
 } from '@tanstack/react-table';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { ChevronDown, Settings } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -110,6 +112,12 @@ export default function LeadsPage() {
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState(activeFilters.sortBy || 'updatedAt');
   const [sortOrder, setSortOrder] = useState(activeFilters.order || 'desc');
+  const [isFilterOpen, setIsFilterOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('leadsFilterOpen') !== 'false';
+    }
+    return true;
+  });
 
   const { data, isLoading } = useLeads({ ...activeFilters, page, limit: 20 });
   const leads: Lead[] = data?.data || [];
@@ -129,6 +137,10 @@ export default function LeadsPage() {
     setSortBy(activeFilters.sortBy || 'updatedAt');
     setSortOrder(activeFilters.order || 'desc');
   }, [activeFilters.assignedTo, activeFilters.order, activeFilters.preferredCollege, activeFilters.q, activeFilters.sortBy]);
+
+  useEffect(() => {
+    localStorage.setItem('leadsFilterOpen', String(isFilterOpen));
+  }, [isFilterOpen]);
 
   const bulkUpdate = useBulkUpdateLeads();
   const bulkAssign = useBulkAssignLeads();
@@ -422,10 +434,21 @@ export default function LeadsPage() {
       {/* Filters */}
       <div className="bg-card rounded-2xl border border-border shadow-soft">
         <div className="border-b border-border px-4 py-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-foreground">Search and sort</p>
-            <p className="text-xs text-muted-foreground">Find leads quickly, then narrow by status, source, or college.</p>
-          </div>
+          <button
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className="flex items-center justify-between lg:flex-row gap-3 w-full lg:w-auto"
+          >
+            <div className="text-left">
+              <p className="text-sm font-semibold text-foreground">Search and sort</p>
+              <p className="text-xs text-muted-foreground">Find leads quickly, then narrow by status, source, or college.</p>
+            </div>
+            <ChevronDown
+              className={cn(
+                'w-5 h-5 text-muted-foreground transition-transform duration-200',
+                isFilterOpen && 'rotate-180',
+              )}
+            />
+          </button>
           <div className="flex flex-wrap items-center gap-2">
             {(activeFilters.status ||
               activeFilters.temperature ||
@@ -440,7 +463,7 @@ export default function LeadsPage() {
 
             <DropdownMenu>
               <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground h-9">
-                ⚙️ Columns
+                <Settings className="w-4 h-4" /> Columns
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 {table.getAllColumns().map((column) => {
@@ -460,8 +483,17 @@ export default function LeadsPage() {
           </div>
         </div>
 
-        <div className="px-4 py-4 space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12">
+        <AnimatePresence>
+          {isFilterOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="px-4 py-4 space-y-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12">
             <div className="space-y-1.5 lg:col-span-4">
               <Label htmlFor="search-input" className="text-xs uppercase tracking-wide text-muted-foreground">
                 Search
@@ -621,7 +653,10 @@ export default function LeadsPage() {
             {activeFilters.assignedTo && <span className="rounded-full bg-muted px-3 py-1">Assigned to: {staffUsers.find((staff: any) => staff._id === activeFilters.assignedTo)?.name || 'Selected staff'}</span>}
             <span className="rounded-full bg-primary/10 px-3 py-1 text-primary">Sort: {sortBy} · {sortOrder}</span>
           </div>
-        </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Bulk actions bar */}
@@ -688,7 +723,6 @@ export default function LeadsPage() {
           </div>
         ) : leads.length === 0 ? (
           <EmptyState
-            icon="📋"
             title="No leads yet"
             description="Add your first student to get started."
             cta={{ label: 'Add Lead', onClick: openCreateLead }}
@@ -697,11 +731,11 @@ export default function LeadsPage() {
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="bg-muted/50 border-b border-border">
+                <TableRow key={headerGroup.id} className="bg-gradient-to-r from-muted/40 to-muted/20 border-b border-border hover:bg-muted/50 transition-colors">
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="text-xs font-semibold uppercase text-muted-foreground"
+                      className="text-xs font-bold uppercase text-foreground tracking-wide py-3"
                     >
                       {flexRender(
                         header.column.columnDef.header,
@@ -719,13 +753,16 @@ export default function LeadsPage() {
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.03, duration: 0.2 }}
-                  className={`cursor-pointer border-l-4 transition-colors hover:bg-muted/50 ${temperatureBorderClass(
-                    row.original.temperature,
-                  )}`}
+                  className={cn(
+                    'cursor-pointer border-l-4 transition-all duration-200 group',
+                    'hover:bg-accent/50 dark:hover:bg-accent/20',
+                    'border-b border-border last:border-b-0',
+                    temperatureBorderClass(row.original.temperature),
+                  )}
                   onClick={() => router.push(`/leads/${row.original._id}`)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-3 sm:px-4 py-3 text-xs sm:text-sm">
+                    <td key={cell.id} className="px-3 sm:px-4 py-4 text-xs sm:text-sm group-hover:text-foreground transition-colors">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),

@@ -166,4 +166,35 @@
   .dark .shadow-soft {
     box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.2), 0 0 3px rgba(0,0,0,0.1);
   }
+
+  /* Typography improvements */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+  
+  h1 {
+    @apply text-3xl md:text-4xl;
+  }
+  
+  h2 {
+    @apply text-2xl md:text-3xl;
+  }
+  
+  h3 {
+    @apply text-xl md:text-2xl;
+  }
+  
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Label styling for better contrast in both modes */
+  label {
+    @apply text-sm font-medium text-foreground;
+  }
+
+  /* Better form input styling */
+  input, textarea, select {
+    @apply bg-background dark:bg-card;
+  }
 }

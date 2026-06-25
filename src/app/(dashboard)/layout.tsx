@@ -19,17 +19,17 @@ import { api } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { usePendingFollowUps } from '@/hooks/use-leads';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Users, Bell, BarChart3, User, Search } from 'lucide-react';
 
 const navItems = [
-  { href: '/leads', label: 'Leads', icon: '👥' },
-  { href: '/follow-ups', label: 'Follow-ups', icon: '🔔', showBadge: true },
+  { href: '/leads', label: 'Leads', Icon: Users },
+  { href: '/follow-ups', label: 'Follow-ups', Icon: Bell, showBadge: true },
 ];
 
 const adminNavItems = [
-  { href: '/admin/dashboard', label: 'Analytics', icon: '📊' },
-  { href: '/admin/staff', label: 'Staff', icon: '👤' },
-  { href: '/admin/audit', label: 'Audit Log', icon: '🔍' },
+  { href: '/admin/dashboard', label: 'Analytics', Icon: BarChart3 },
+  { href: '/admin/staff', label: 'Staff', Icon: User },
+  { href: '/admin/audit', label: 'Audit Log', Icon: Search },
 ];
 
 export default function DashboardLayout({
@@ -93,7 +93,7 @@ export default function DashboardLayout({
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground',
               )}
             >
-              <span className="text-base flex-shrink-0">{item.icon}</span>
+              <item.Icon className="w-5 h-5 flex-shrink-0" />
               {sidebarOpen && (
                 <span className="flex-1">{item.label}</span>
               )}
@@ -126,7 +126,7 @@ export default function DashboardLayout({
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                   )}
                 >
-                  <span className="text-base flex-shrink-0">{item.icon}</span>
+                  <item.Icon className="w-5 h-5 flex-shrink-0" />
                   {sidebarOpen && <span>{item.label}</span>}
                 </Link>
               ))}
