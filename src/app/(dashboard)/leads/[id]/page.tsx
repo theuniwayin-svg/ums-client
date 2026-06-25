@@ -62,6 +62,35 @@ const ACTIVITY_ICONS: Record<string, string> = {
   LEAD_DELETED: '🗑️',
 };
 
+function formatActivityValue(value: unknown): string {
+  if (value === null || value === undefined || value === '') {
+    return '—';
+  }
+
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => formatActivityValue(item)).join(', ');
+  }
+
+  if (typeof value === 'object') {
+    return Object.entries(value as Record<string, unknown>)
+      .map(([key, nestedValue]) => `${key}: ${formatActivityValue(nestedValue)}`)
+      .join(', ');
+  }
+
+  return String(value);
+}
+
+function prettyFieldName(field: string) {
+  return field
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
 export default function LeadDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -364,8 +393,54 @@ export default function LeadDetailPage() {
                           ` · ${activity.fieldChanged}`}
                         {activity.previousValue !== undefined &&
                           activity.newValue !== undefined &&
-                          ` · ${activity.previousValue} → ${activity.newValue}`}
+                          typeof activity.previousValue !== 'object' &&
+                          typeof activity.newValue !== 'object' &&
+                          ` · ${formatActivityValue(activity.previousValue)} → ${formatActivityValue(activity.newValue)}`}
                       </p>
+                      {activity.previousValue !== undefined &&
+                        activity.newValue !== undefined &&
+                        (typeof activity.previousValue === 'object' ||
+                          typeof activity.newValue === 'object') && (
+                          <div className="mt-1 space-y-1 rounded-lg bg-gray-50 px-2 py-1 text-xs text-gray-600">
+                            {(() => {
+                              const changedFields = String(activity.fieldChanged || '')
+                                .split(',')
+                                .map((field) => field.trim())
+                                .filter(Boolean);
+                              const previousValues =
+                                activity.previousValue &&
+                                typeof activity.previousValue === 'object'
+                                  ? (activity.previousValue as Record<string, unknown>)
+                                  : {};
+                              const newValues =
+                                activity.newValue &&
+                                typeof activity.newValue === 'object'
+                                  ? (activity.newValue as Record<string, unknown>)
+                                  : {};
+
+                              const fieldsToRender =
+                                changedFields.length > 0
+                                  ? changedFields
+                                  : Object.keys({
+                                      ...previousValues,
+                                      ...newValues,
+                                    });
+
+                              return fieldsToRender.map((field) => (
+                                <div key={field} className="flex flex-wrap gap-1">
+                                  <span className="font-medium text-gray-700">
+                                    {prettyFieldName(field)}
+                                  </span>
+                                  <span>:</span>
+                                  <span>
+                                    {formatActivityValue(previousValues[field])} →{' '}
+                                    {formatActivityValue(newValues[field])}
+                                  </span>
+                                </div>
+                              ));
+                            })()}
+                          </div>
+                        )}
                       <p className="text-gray-400 text-xs">
                         {format(new Date(activity.createdAt), 'MMM d, h:mm a')}
                       </p>
