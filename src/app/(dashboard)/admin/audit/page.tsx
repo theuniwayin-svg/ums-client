@@ -81,7 +81,6 @@ export default function AuditPage() {
         ))
       ) : logs.length === 0 ? (
         <EmptyState
-          icon="🔍"
           title="No audit logs"
           description="Admin actions will appear here."
         />
@@ -90,18 +89,18 @@ export default function AuditPage() {
           <Card>
             <CardContent className="p-0">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-muted/50 border-b border-border">
                   <tr>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">
                       Action
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">
                       Performed By
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">
                       Details
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">
                       Timestamp
                     </th>
                   </tr>
@@ -110,7 +109,7 @@ export default function AuditPage() {
                   {logs.map((log: any) => (
                     <tr
                       key={log._id}
-                      className="border-b border-gray-100 hover:bg-gray-50"
+                      className="border-b border-border hover:bg-muted/30 transition-colors"
                     >
                       <td className="px-4 py-3">
                         <Badge

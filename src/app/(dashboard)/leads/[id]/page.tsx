@@ -393,7 +393,6 @@ export default function LeadDetailPage() {
             <Separator />
             {!notes || (notes as any[]).length === 0 ? (
               <EmptyState
-                icon="📝"
                 title="No notes"
                 description="No notes for this lead. Add context for your team."
               />
@@ -402,10 +401,10 @@ export default function LeadDetailPage() {
                 {(notes as any[]).map((note: any) => (
                   <div
                     key={note._id}
-                    className="bg-gray-50 rounded-lg p-3 text-sm"
+                    className="bg-muted rounded-lg p-3 text-sm border border-border"
                   >
-                    <p className="text-gray-800">{note.content}</p>
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-foreground">{note.content}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
                       {note.createdByName} ·{' '}
                       {format(new Date(note.createdAt), 'MMM d, h:mm a')}
                     </p>
@@ -523,7 +522,6 @@ export default function LeadDetailPage() {
           <CardContent>
             {activities.length === 0 ? (
               <EmptyState
-                icon="📋"
                 title="No activity yet"
                 description="This is where every change to this lead will appear."
               />
@@ -541,10 +539,10 @@ export default function LeadDetailPage() {
                       {ACTIVITY_ICONS[activity.actionType] || '📌'}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-gray-700 font-medium truncate">
+                      <p className="text-foreground font-medium truncate">
                         {activity.performedByName}
                       </p>
-                      <p className="text-gray-500 text-xs">
+                      <p className="text-muted-foreground text-xs">
                         {activity.actionType.replace(/_/g, ' ').toLowerCase()}
                         {activity.fieldChanged &&
                           ` · ${activity.fieldChanged}`}

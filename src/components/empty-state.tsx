@@ -1,7 +1,8 @@
 import { cn } from '@/lib/utils';
+import { Inbox } from 'lucide-react';
+import { Button } from './ui/button';
 
 interface EmptyStateProps {
-  icon?: string;
   title: string;
   description?: string;
   cta?: {
@@ -12,7 +13,6 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  icon = '📭',
   title,
   description,
   cta,
@@ -25,18 +25,20 @@ export function EmptyState({
         className,
       )}
     >
-      <span className="text-5xl mb-4">{icon}</span>
-      <h3 className="text-lg font-semibold text-gray-900 mb-1">{title}</h3>
+      <div className="p-4 rounded-full bg-muted mb-4">
+        <Inbox className="w-8 h-8 text-muted-foreground" />
+      </div>
+      <h3 className="text-lg font-semibold text-foreground mb-1">{title}</h3>
       {description && (
-        <p className="text-sm text-gray-500 max-w-sm">{description}</p>
+        <p className="text-sm text-muted-foreground max-w-sm">{description}</p>
       )}
       {cta && (
-        <button
+        <Button
           onClick={cta.onClick}
-          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+          className="mt-4"
         >
           {cta.label}
-        </button>
+        </Button>
       )}
     </div>
   );

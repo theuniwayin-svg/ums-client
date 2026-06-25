@@ -23,6 +23,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { Users, GraduationCap, Clock, Flame, TrendingUp, User } from 'lucide-react';
 
 const STATUS_COLORS: Record<string, string> = {
   New: '#6366f1',
@@ -48,8 +49,8 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-3xl font-bold text-foreground">Analytics Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           Team performance and pipeline overview
         </p>
       </div>
@@ -66,25 +67,25 @@ export default function AdminDashboardPage() {
           <KpiCard
             label="Total Active Leads"
             value={dashboard?.totalActiveLeads ?? 0}
-            icon="👥"
+            Icon={Users}
             color="indigo"
           />
           <KpiCard
             label="Admissions This Month"
             value={dashboard?.admissionsThisMonth ?? 0}
-            icon="🎓"
+            Icon={GraduationCap}
             color="green"
           />
           <KpiCard
             label="Pending Follow-ups"
             value={dashboard?.pendingFollowUps ?? 0}
-            icon="🔔"
+            Icon={Clock}
             color="amber"
           />
           <KpiCard
             label="Hot Leads"
             value={dashboard?.leadsByTemperature?.Hot ?? 0}
-            icon="🔥"
+            Icon={Flame}
             color="red"
           />
         </div>
@@ -102,17 +103,16 @@ export default function AdminDashboardPage() {
               <Skeleton className="h-48 w-full" />
             ) : !trends?.trends?.length ? (
               <EmptyState
-                icon="📈"
                 title="Not enough data yet"
                 description="Insights will appear as leads are added."
               />
             ) : (
               <ResponsiveContainer width="100%" height={200}>
                 <AreaChart data={trends.trends}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis
                     dataKey="date"
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
                     tickFormatter={(v) =>
                       new Date(v).toLocaleDateString('en-IN', {
                         month: 'short',
@@ -120,8 +120,8 @@ export default function AdminDashboardPage() {
                       })
                     }
                   />
-                  <YAxis tick={{ fontSize: 10 }} />
-                  <Tooltip />
+                  <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
                   <Area
                     type="monotone"
                     dataKey="count"
@@ -193,10 +193,10 @@ export default function AdminDashboardPage() {
                     dashboard?.leadsBySource || {},
                   ).map(([name, value]) => ({ name, value }))}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} />
-                  <Tooltip />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
                   <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -250,7 +250,6 @@ export default function AdminDashboardPage() {
             <Skeleton className="h-48 w-full" />
           ) : !staff?.staff?.length ? (
             <EmptyState
-              icon="👤"
               title="No staff data"
               description="Activity data will appear once staff start using the system."
             />
@@ -258,30 +257,30 @@ export default function AdminDashboardPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-2 text-gray-500 font-medium">
+                  <tr className="border-b border-border bg-muted/50">
+                    <th className="text-left py-3 px-2 text-muted-foreground font-semibold">
                       Staff
                     </th>
-                    <th className="text-right py-2 text-gray-500 font-medium">
+                    <th className="text-right py-3 px-2 text-muted-foreground font-semibold">
                       Leads Created
                     </th>
-                    <th className="text-right py-2 text-gray-500 font-medium">
+                    <th className="text-right py-3 px-2 text-muted-foreground font-semibold">
                       Admissions
                     </th>
-                    <th className="text-right py-2 text-gray-500 font-medium">
+                    <th className="text-right py-3 px-2 text-muted-foreground font-semibold">
                       Activities
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {staff.staff.map((s: any) => (
-                    <tr key={s._id} className="border-b border-gray-100">
-                      <td className="py-2 font-medium">{s.name}</td>
-                      <td className="py-2 text-right">{s.leadsCreated}</td>
-                      <td className="py-2 text-right text-green-600">
+                    <tr key={s._id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                      <td className="py-3 px-2 font-medium text-foreground">{s.name}</td>
+                      <td className="py-3 px-2 text-right text-foreground">{s.leadsCreated}</td>
+                      <td className="py-3 px-2 text-right text-emerald-600 dark:text-emerald-400 font-medium">
                         {s.admissions}
                       </td>
-                      <td className="py-2 text-right text-gray-500">
+                      <td className="py-3 px-2 text-right text-muted-foreground">
                         {s.activitiesThisWeek}
                       </td>
                     </tr>
@@ -299,31 +298,33 @@ export default function AdminDashboardPage() {
 function KpiCard({
   label,
   value,
-  icon,
+  Icon,
   color,
 }: {
   label: string;
   value: number;
-  icon: string;
+  Icon: React.ComponentType<{ className?: string }>;
   color: string;
 }) {
-  const colorMap: Record<string, string> = {
-    indigo: 'bg-indigo-50 text-indigo-700',
-    green: 'bg-green-50 text-green-700',
-    amber: 'bg-amber-50 text-amber-700',
-    red: 'bg-red-50 text-red-700',
+  const colorMap: Record<string, { bg: string; text: string }> = {
+    indigo: { bg: 'bg-indigo-500/15 dark:bg-indigo-500/20', text: 'text-indigo-600 dark:text-indigo-400' },
+    green: { bg: 'bg-emerald-500/15 dark:bg-emerald-500/20', text: 'text-emerald-600 dark:text-emerald-400' },
+    amber: { bg: 'bg-amber-500/15 dark:bg-amber-500/20', text: 'text-amber-600 dark:text-amber-400' },
+    red: { bg: 'bg-rose-500/15 dark:bg-rose-500/20', text: 'text-rose-600 dark:text-rose-400' },
   };
 
+  const colors = colorMap[color] || colorMap.indigo;
+
   return (
-    <Card>
+    <Card className="border border-border hover:border-border/80 transition-all duration-200 shadow-sm hover:shadow-md">
       <CardContent className="pt-5">
-        <div className="flex items-center justify-between mb-2">
-          <span className={`text-2xl p-2 rounded-lg ${colorMap[color] || 'bg-gray-50'}`}>
-            {icon}
-          </span>
+        <div className="flex items-center justify-between mb-3">
+          <div className={`p-3 rounded-xl ${colors.bg}`}>
+            <Icon className={`w-6 h-6 ${colors.text}`} />
+          </div>
         </div>
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
-        <p className="text-xs text-gray-500 mt-1">{label}</p>
+        <p className="text-2xl font-bold text-foreground">{value}</p>
+        <p className="text-xs text-muted-foreground mt-1">{label}</p>
       </CardContent>
     </Card>
   );

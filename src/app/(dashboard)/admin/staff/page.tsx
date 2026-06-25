@@ -192,7 +192,6 @@ export default function StaffPage() {
         ))
       ) : users.length === 0 ? (
         <EmptyState
-          icon="👤"
           title="No staff yet"
           description="Add staff accounts to give your team access."
         />
@@ -200,21 +199,21 @@ export default function StaffPage() {
         <Card>
           <CardContent className="p-0">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-muted/50 border-b border-border">
                 <tr>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">
                     Name
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">
                     Email
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">
                     Role
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">
                     Status
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">
                     Last Login
                   </th>
                   <th className="px-4 py-3" />
@@ -224,9 +223,9 @@ export default function StaffPage() {
                 {users.map((user: any) => (
                   <tr
                     key={user._id}
-                    className="border-b border-gray-100 hover:bg-gray-50"
+                    className="border-b border-border hover:bg-muted/30 transition-colors"
                   >
-                    <td className="px-4 py-3 font-medium">{user.name}</td>
+                    <td className="px-4 py-3 font-medium text-foreground">{user.name}</td>
                     <td className="px-4 py-3 text-gray-500">{user.email}</td>
                     <td className="px-4 py-3 capitalize">{user.role}</td>
                     <td className="px-4 py-3">

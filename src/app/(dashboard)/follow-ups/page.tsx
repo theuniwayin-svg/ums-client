@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { usePendingFollowUps, useCompleteFollowUp } from '@/hooks/use-leads';
 import { EmptyState } from '@/components/empty-state';
 import { cn } from '@/lib/utils';
+import { AlertCircle, Clock, CheckCircle } from 'lucide-react';
 
 function getFollowUpUrgency(date: string) {
   const followUpDate = new Date(date);
@@ -33,8 +34,8 @@ export default function FollowUpsPage() {
   return (
     <div className="space-y-4 max-w-2xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Follow-ups</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-3xl font-bold text-foreground">Follow-ups</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           Pending reminders for leads you can access, due in the next 24 hours
         </p>
       </div>
@@ -45,7 +46,6 @@ export default function FollowUpsPage() {
         ))
       ) : followUpsList.length === 0 ? (
         <EmptyState
-          icon="🎉"
           title="All caught up!"
           description="No reminders. Schedule a callback to stay on track."
         />
@@ -103,40 +103,40 @@ function FollowUpCard({
     >
       <Card
         className={cn(
-          'border-l-4',
-          urgency === 'overdue' && 'border-l-red-500 bg-red-50',
-          urgency === 'today' && 'border-l-yellow-400 bg-yellow-50',
-          urgency === 'upcoming' && 'border-l-gray-300',
+          'border-l-4 transition-all duration-200',
+          urgency === 'overdue' && 'border-l-rose-500 bg-rose-500/5 dark:bg-rose-500/10 hover:bg-rose-500/10',
+          urgency === 'today' && 'border-l-amber-400 bg-amber-500/5 dark:bg-amber-500/10 hover:bg-amber-500/10',
+          urgency === 'upcoming' && 'border-l-slate-300 dark:border-l-slate-600 hover:bg-muted/50',
         )}
       >
         <CardContent className="py-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-2">
                 {urgency === 'overdue' && (
-                  <span className="text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded-full">
-                    🔴 Overdue
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-rose-600 dark:text-rose-400 bg-rose-100/50 dark:bg-rose-500/20 px-2.5 py-1 rounded-full">
+                    <AlertCircle className="w-3.5 h-3.5" /> Overdue
                   </span>
                 )}
                 {urgency === 'today' && (
-                  <span className="text-xs font-medium text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded-full">
-                    🟡 Today
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-100/50 dark:bg-amber-500/20 px-2.5 py-1 rounded-full">
+                    <Clock className="w-3.5 h-3.5" /> Today
                   </span>
                 )}
               </div>
               {lead && (
                 <Link
                   href={`/leads/${lead._id}`}
-                  className="font-semibold text-gray-900 hover:text-indigo-600 transition-colors"
+                  className="font-semibold text-foreground hover:text-primary transition-colors"
                 >
                   {lead.studentName}
                 </Link>
               )}
-              <p className="text-sm text-gray-600 mt-0.5">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 {followUp.type} · {followUp.note || 'No note'}
               </p>
               {followUp.scheduledFor && (
-                <p className="text-xs text-gray-400 mt-0.5">
+                <p className="text-xs text-muted-foreground/70 mt-0.5">
                   {format(new Date(followUp.scheduledFor), 'MMM d, h:mm a')}
                 </p>
               )}
@@ -145,9 +145,9 @@ function FollowUpCard({
               size="sm"
               onClick={handleComplete}
               disabled={completeFollowUp.isPending}
-              className="flex-shrink-0 bg-green-600 hover:bg-green-700"
+              className="flex-shrink-0 gap-2"
             >
-              ✓ Done
+              <CheckCircle className="w-4 h-4" /> Done
             </Button>
           </div>
         </CardContent>
