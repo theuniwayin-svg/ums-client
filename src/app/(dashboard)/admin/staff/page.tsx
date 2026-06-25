@@ -249,11 +249,7 @@ export default function StaffPage() {
                     <td className="px-4 py-3">
                       {user.isActive ? (
                         <AlertDialog>
-                          <AlertDialogTrigger>
-                            <Button variant="ghost" size="sm" className="text-red-600">
-                              Disable
-                            </Button>
-                          </AlertDialogTrigger>
+                          <AlertDialogTrigger render={<Button variant="ghost" size="sm" className="text-red-600">Disable</Button>} />
                           <AlertDialogContent>
                             <AlertDialogHeader>
                               <AlertDialogTitle>

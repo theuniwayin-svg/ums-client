@@ -167,11 +167,7 @@ export default function LeadDetailPage() {
         <div className="flex items-center gap-3">
           <TemperatureBadge temperature={lead.temperature} />
           <AlertDialog>
-            <AlertDialogTrigger>
-              <Button variant="destructive" size="sm">
-                Close Lead
-              </Button>
-            </AlertDialogTrigger>
+            <AlertDialogTrigger render={<Button variant="destructive" size="sm">Close Lead</Button>} />
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Close this lead?</AlertDialogTitle>
