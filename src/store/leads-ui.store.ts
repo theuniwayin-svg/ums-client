@@ -6,6 +6,7 @@ export interface LeadFilters {
   temperature?: string;
   source?: string;
   createdBy?: string;
+  assignedTo?: string;
   q?: string;
   city?: string;
   course?: string;

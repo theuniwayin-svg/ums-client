@@ -95,6 +95,7 @@ export default function LeadsPage() {
 
   const [searchValue, setSearchValue] = useState('');
   const [collegeValue, setCollegeValue] = useState(activeFilters.preferredCollege || '');
+  const [assignedToValue, setAssignedToValue] = useState(activeFilters.assignedTo || '');
   const [assigneeId, setAssigneeId] = useState('');
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState(activeFilters.sortBy || 'updatedAt');
@@ -114,9 +115,10 @@ export default function LeadsPage() {
   useEffect(() => {
     setSearchValue(activeFilters.q || '');
     setCollegeValue(activeFilters.preferredCollege || '');
+    setAssignedToValue(activeFilters.assignedTo || '');
     setSortBy(activeFilters.sortBy || 'updatedAt');
     setSortOrder(activeFilters.order || 'desc');
-  }, [activeFilters.order, activeFilters.preferredCollege, activeFilters.q, activeFilters.sortBy]);
+  }, [activeFilters.assignedTo, activeFilters.order, activeFilters.preferredCollege, activeFilters.q, activeFilters.sortBy]);
 
   const bulkUpdate = useBulkUpdateLeads();
   const bulkAssign = useBulkAssignLeads();
@@ -150,6 +152,11 @@ export default function LeadsPage() {
   const handleCollegeChange = (value: string) => {
     setCollegeValue(value);
     setFilter('preferredCollege', value || undefined);
+  };
+
+  const handleAssignedToChange = (value: string) => {
+    setAssignedToValue(value);
+    setFilter('assignedTo', value || undefined);
   };
 
   const handleSortChange = (nextSortBy: string, nextSortOrder: string) => {
@@ -189,6 +196,7 @@ export default function LeadsPage() {
   const handleClearFilters = () => {
     setSearchValue('');
     setCollegeValue('');
+    setAssignedToValue('');
     setAssigneeId('');
     setSortBy('updatedAt');
     setSortOrder('desc');
@@ -379,17 +387,16 @@ export default function LeadsPage() {
               activeFilters.temperature ||
               activeFilters.source ||
               activeFilters.q ||
-              activeFilters.preferredCollege) && (
+              activeFilters.preferredCollege ||
+              activeFilters.assignedTo) && (
               <Button variant="ghost" onClick={handleClearFilters} size="sm">
                 Clear filters
               </Button>
             )}
 
             <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Button variant="outline" size="sm">
-                  ⚙️ Columns
-                </Button>
+              <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground h-9">
+                ⚙️ Columns
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 {table.getAllColumns().map((column) => {
@@ -435,6 +442,31 @@ export default function LeadsPage() {
               />
               <p className="text-xs text-gray-500">Type to filter by any existing college name.</p>
             </div>
+
+            {isAdmin && (
+              <div className="space-y-1.5 lg:col-span-3">
+                <Label className="text-xs uppercase tracking-wide text-gray-500">
+                  Assigned to
+                </Label>
+                <Select
+                  value={assignedToValue || 'all'}
+                  onValueChange={(value) => handleAssignedToChange(value === 'all' ? '' : value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="All assignees" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All assignees</SelectItem>
+                    {staffUsers.map((staff: any) => (
+                      <SelectItem key={staff._id} value={staff._id}>
+                        {staff.name} · {staff.role}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500">Admin-only filter by lead owner.</p>
+              </div>
+            )}
 
             <div className="space-y-1.5 lg:col-span-2">
               <Label className="text-xs uppercase tracking-wide text-gray-500">
@@ -542,6 +574,7 @@ export default function LeadsPage() {
             {activeFilters.source && <span className="rounded-full bg-gray-100 px-3 py-1">Source: {activeFilters.source}</span>}
             {activeFilters.q && <span className="rounded-full bg-gray-100 px-3 py-1">Search: {activeFilters.q}</span>}
             {activeFilters.preferredCollege && <span className="rounded-full bg-gray-100 px-3 py-1">College: {activeFilters.preferredCollege}</span>}
+            {activeFilters.assignedTo && <span className="rounded-full bg-gray-100 px-3 py-1">Assigned to: {staffUsers.find((staff: any) => staff._id === activeFilters.assignedTo)?.name || 'Selected staff'}</span>}
             <span className="rounded-full bg-indigo-50 px-3 py-1 text-indigo-700">Sort: {sortBy} · {sortOrder}</span>
           </div>
         </div>
