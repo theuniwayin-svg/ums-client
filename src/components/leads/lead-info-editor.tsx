@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CollegePicker } from '@/components/college-picker';
-import { api } from '@/lib/api-client';
 import { useUsers } from '@/hooks/use-admin';
 import { useAuthStore } from '@/store/auth.store';
 import { useUpdateLead } from '@/hooks/use-leads';
@@ -80,14 +78,6 @@ export function LeadInfoEditor({
     assignedTo: assignedToId,
   });
   const [isSaving, setIsSaving] = useState(false);
-  const { data: currentAssigneeData } = useQuery({
-    queryKey: ['users', assignedToId],
-    queryFn: async () => {
-      const { data } = await api.users.get(assignedToId);
-      return data?.data;
-    },
-    enabled: canEditAssignee && !!assignedToId && !currentAssignee,
-  });
 
   const staffUsers = (() => {
     const maybeRows = staffUsersData?.data?.data;
@@ -101,10 +91,14 @@ export function LeadInfoEditor({
 
     return rows.filter((staff: any) => ['admin', 'staff', 'superadmin'].includes(staff.role));
   })();
-  const resolvedCurrentAssignee = currentAssignee || currentAssigneeData || null;
-  const hasCurrentAssigneeOption = !currentAssignee
-    ? true
-    : staffUsers.some((staff: any) => staff._id === currentAssignee._id);
+  const selectedAssignee = assignedToId
+    ? staffUsers.find((staff: any) => staff._id === assignedToId) || currentAssignee
+    : null;
+  const assigneeLabel = selectedAssignee
+    ? `${selectedAssignee.name}${selectedAssignee.role ? ` · ${selectedAssignee.role}` : ''}`
+    : assignedToId
+      ? 'Selected staff member'
+      : 'Select assignee';
 
   useEffect(() => {
     setDraft({
@@ -273,13 +267,13 @@ export function LeadInfoEditor({
               onValueChange={(value) => handleFieldChange('assignedTo', value === 'unassigned' ? '' : value)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select assignee" />
+                <span className="truncate">{assigneeLabel}</span>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="unassigned">Unassigned</SelectItem>
-                {resolvedCurrentAssignee && !hasCurrentAssigneeOption && (
-                  <SelectItem value={resolvedCurrentAssignee._id}>
-                    {resolvedCurrentAssignee.name} · {resolvedCurrentAssignee.role || 'User'}
+                {assignedToId && !staffUsers.some((staff: any) => staff._id === assignedToId) && (
+                  <SelectItem value={assignedToId}>
+                    {assigneeLabel}
                   </SelectItem>
                 )}
                 {staffUsers.map((staff: any) => (
