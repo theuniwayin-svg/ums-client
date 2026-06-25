@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CollegePicker } from '@/components/college-picker';
+import { api } from '@/lib/api-client';
+import { useUsers } from '@/hooks/use-admin';
+import { useAuthStore } from '@/store/auth.store';
 import { useUpdateLead } from '@/hooks/use-leads';
 import type { Lead } from '@/schemas/lead.schema';
 
@@ -26,6 +30,7 @@ interface LeadInfoEditorProps {
   layout?: 'stacked' | 'compact';
   title?: string;
   description?: string;
+  showAssignedTo?: boolean;
 }
 
 type LeadInfoDraft = {
@@ -39,15 +44,28 @@ type LeadInfoDraft = {
   preferredCollege: string;
   source: string;
   otherSourceDescription: string;
+  assignedTo: string;
 };
+
+function getAssignedToId(assignedTo: Lead['assignedTo']) {
+  if (!assignedTo) return '';
+  return typeof assignedTo === 'object' ? assignedTo._id : assignedTo;
+}
 
 export function LeadInfoEditor({
   lead,
   layout = 'stacked',
   title = 'Lead Information',
   description = 'Update the core lead details here.',
+  showAssignedTo = false,
 }: LeadInfoEditorProps) {
   const updateLead = useUpdateLead(lead._id);
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
+  const canEditAssignee = showAssignedTo && isAdmin;
+  const { data: staffUsersData } = useUsers({ limit: 100 }, canEditAssignee);
+  const currentAssignee = typeof lead.assignedTo === 'object' ? lead.assignedTo : null;
+  const assignedToId = getAssignedToId(lead.assignedTo);
   const [draft, setDraft] = useState<LeadInfoDraft>({
     studentName: lead.studentName || '',
     phone: lead.phone || '',
@@ -59,8 +77,34 @@ export function LeadInfoEditor({
     preferredCollege: lead.preferredCollege || '',
     source: lead.source || 'Meta Ads',
     otherSourceDescription: lead.otherSourceDescription || '',
+    assignedTo: assignedToId,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const { data: currentAssigneeData } = useQuery({
+    queryKey: ['users', assignedToId],
+    queryFn: async () => {
+      const { data } = await api.users.get(assignedToId);
+      return data?.data;
+    },
+    enabled: canEditAssignee && !!assignedToId && !currentAssignee,
+  });
+
+  const staffUsers = (() => {
+    const maybeRows = staffUsersData?.data?.data;
+    const rows = Array.isArray(maybeRows)
+      ? maybeRows
+      : Array.isArray(staffUsersData?.data)
+        ? staffUsersData.data
+        : Array.isArray(staffUsersData)
+          ? staffUsersData
+          : [];
+
+    return rows.filter((staff: any) => ['admin', 'staff', 'superadmin'].includes(staff.role));
+  })();
+  const resolvedCurrentAssignee = currentAssignee || currentAssigneeData || null;
+  const hasCurrentAssigneeOption = !currentAssignee
+    ? true
+    : staffUsers.some((staff: any) => staff._id === currentAssignee._id);
 
   useEffect(() => {
     setDraft({
@@ -74,6 +118,7 @@ export function LeadInfoEditor({
       preferredCollege: lead.preferredCollege || '',
       source: lead.source || 'Meta Ads',
       otherSourceDescription: lead.otherSourceDescription || '',
+      assignedTo: getAssignedToId(lead.assignedTo),
     });
   }, [lead]);
 
@@ -95,6 +140,10 @@ export function LeadInfoEditor({
 
     if (draft.source !== 'Other') {
       payload.otherSourceDescription = '';
+    }
+
+    if (canEditAssignee && draft.assignedTo !== getAssignedToId(lead.assignedTo)) {
+      payload.assignedTo = draft.assignedTo;
     }
 
     if (Object.keys(payload).length === 1) {
@@ -211,6 +260,35 @@ export function LeadInfoEditor({
               onChange={(event) => handleFieldChange('otherSourceDescription', event.target.value)}
               rows={2}
             />
+          </div>
+        )}
+
+        {canEditAssignee && (
+          <div className="space-y-1.5 md:col-span-2">
+            <Label className="text-xs uppercase tracking-wide text-gray-500">
+              Assigned To
+            </Label>
+            <Select
+              value={draft.assignedTo || 'unassigned'}
+              onValueChange={(value) => handleFieldChange('assignedTo', value === 'unassigned' ? '' : value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select assignee" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+                {resolvedCurrentAssignee && !hasCurrentAssigneeOption && (
+                  <SelectItem value={resolvedCurrentAssignee._id}>
+                    {resolvedCurrentAssignee.name} · {resolvedCurrentAssignee.role || 'User'}
+                  </SelectItem>
+                )}
+                {staffUsers.map((staff: any) => (
+                  <SelectItem key={staff._id} value={staff._id}>
+                    {staff.name} · {staff.role}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
       </div>

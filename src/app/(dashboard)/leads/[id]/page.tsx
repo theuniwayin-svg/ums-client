@@ -43,6 +43,7 @@ import {
 import { EmptyState } from '@/components/empty-state';
 import { cn } from '@/lib/utils';
 import { LeadInfoEditor } from '@/components/leads/lead-info-editor';
+import { useAuthStore } from '@/store/auth.store';
 
 const STATUS_FLOW = [
   'New', 'Called', 'Interested', 'Follow Up', 'Admission Confirmed',
@@ -94,6 +95,8 @@ function prettyFieldName(field: string) {
 export default function LeadDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
   const [newNote, setNewNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -299,6 +302,7 @@ export default function LeadDetailPage() {
             lead={lead}
             title="Lead Information"
             description="Edit the lead profile and keep the activity trail in sync."
+            showAssignedTo={isAdmin}
           />
         </CardContent>
       </Card>
