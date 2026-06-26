@@ -13,7 +13,7 @@ import {
 } from '@tanstack/react-table';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { ChevronDown, Settings } from 'lucide-react';
+import { ChevronDown, Settings, Phone, MessageSquare, Edit, SlidersHorizontal, X, Plus, Search, ArrowUpDown, Flame, Sun, Snowflake } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,6 +51,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLeads, useCreateNote, useBulkUpdateLeads } from '@/hooks/use-leads';
 import { useLeadsUiStore } from '@/store/leads-ui.store';
+import type { LeadFilters } from '@/store/leads-ui.store';
 import { useDebouncedCallback } from '@/hooks/use-debounce';
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useMediaQuery } from '@/hooks/use-media-query';
@@ -375,19 +376,46 @@ export default function LeadsPage() {
     },
     {
       id: 'actions',
-      header: '',
-      cell: ({ row }) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            openQuickEdit(row.original._id);
-          }}
-        >
-          ✏️
-        </Button>
-      ),
+        header: '',
+        cell: ({ row }) => {
+          const phone = row.original.phone || '';
+          const phoneDigits = phone.replace(/[^0-9+]/g, '');
+          const waUrl = `https://wa.me/${phoneDigits.replace(/^\+/, '')}`;
+          return (
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              <Button
+                variant="ghost"
+                size="sm"
+                title="Call"
+                onClick={() => window.open(`tel:${phoneDigits}`)}
+                aria-label="Call lead"
+              >
+                <Phone className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                title="WhatsApp"
+                onClick={() => window.open(waUrl, '_blank')}
+                aria-label="WhatsApp lead"
+              >
+                <MessageSquare className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openQuickEdit(row.original._id);
+                }}
+                title="Edit lead"
+                aria-label="Edit lead"
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+            </div>
+          );
+        },
     },
   ];
 
@@ -409,7 +437,34 @@ export default function LeadsPage() {
   });
 
   if (isMobile) {
-    return <MobileLeadsList leads={leads} isLoading={isLoading} onOpenCreate={openCreateLead} />;
+    return (
+      <>
+        <MobileLeadsList
+          leads={leads}
+          isLoading={isLoading}
+          onOpenCreate={openCreateLead}
+          openQuickEdit={openQuickEdit}
+          activeFilters={activeFilters}
+          searchValue={searchValue}
+          onSearchChange={handleSearchChange}
+          onFilterChange={setFilter}
+          onClearFilters={handleClearFilters}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSortChange={handleSortChange}
+          page={page}
+          totalPages={totalPages}
+          meta={meta}
+          onPageChange={setPage}
+        />
+        <CreateLeadModal open={isCreateLeadOpen} onClose={closeCreateLead} />
+        <QuickEditDrawer
+          open={isQuickEditOpen}
+          leadId={quickEditLeadId}
+          onClose={closeQuickEdit}
+        />
+      </>
+    );
   }
 
   return (
@@ -526,7 +581,7 @@ export default function LeadsPage() {
                 </Label>
                 <Select
                   value={assignedToValue || 'all'}
-                  onValueChange={(value) => handleAssignedToChange(value === 'all' ? '' : value)}
+                  onValueChange={(value) => handleAssignedToChange(value === 'all' ? '' : (value ?? ''))}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="All assignees" />
@@ -611,7 +666,7 @@ export default function LeadsPage() {
               <Label className="text-xs uppercase tracking-wide text-muted-foreground">
                 Sort by
               </Label>
-              <Select value={sortBy} onValueChange={(value) => handleSortChange(value, sortOrder)}>
+              <Select value={sortBy} onValueChange={(value) => value && handleSortChange(value, sortOrder)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Sort field" />
                 </SelectTrigger>
@@ -623,14 +678,14 @@ export default function LeadsPage() {
                   <SelectItem value="temperature">Temperature</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-gray-500">Which field controls ordering.</p>
+              <p className="text-xs text-muted-foreground">Which field controls ordering.</p>
             </div>
 
             <div className="space-y-1.5 lg:col-span-1">
-              <Label className="text-xs uppercase tracking-wide text-gray-500">
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
                 Order
               </Label>
-              <Select value={sortOrder} onValueChange={(value) => handleSortChange(sortBy, value)}>
+              <Select value={sortOrder} onValueChange={(value) => value && handleSortChange(sortBy, value)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Dir" />
                 </SelectTrigger>
@@ -666,7 +721,7 @@ export default function LeadsPage() {
             {selectedRows.length} selected
           </span>
           <div className="w-full sm:w-40">
-            <Select onValueChange={handleBulkStatusChange}>
+            <Select onValueChange={(v) => handleBulkStatusChange(typeof v === 'string' ? v : null)}>
               <SelectTrigger className="w-full h-9 text-xs">
                 <SelectValue placeholder="Bulk status" />
               </SelectTrigger>
@@ -680,7 +735,7 @@ export default function LeadsPage() {
           {isAdmin && (
             <>
               <div className="w-full sm:w-52">
-                <Select value={assigneeId} onValueChange={setAssigneeId}>
+                <Select value={assigneeId} onValueChange={(v) => v && setAssigneeId(v)}>
                   <SelectTrigger className="w-full h-9 text-xs">
                     <SelectValue placeholder="Assign to staff" />
                   </SelectTrigger>
@@ -853,72 +908,453 @@ export default function LeadsPage() {
       </Dialog>
 
       {/* Keyboard shortcut hint */}
-      <div className="fixed bottom-6 right-6 text-xs text-gray-400">
-        Press <kbd className="px-1 py-0.5 bg-gray-100 rounded">?</kbd> for shortcuts
+      <div className="fixed bottom-6 right-6 text-xs text-muted-foreground hidden md:block">
+        Press <kbd className="px-1 py-0.5 bg-muted border border-border rounded">?</kbd> for shortcuts
       </div>
     </div>
   );
 }
 
+// ─── Mobile Leads List ────────────────────────────────────────────────────────
+
+const STATUS_OPTIONS_MOBILE = [
+  'New', 'Called', 'Interested', 'Follow Up',
+  'Admission Confirmed', 'Not Interested', 'Closed',
+];
+const TEMP_OPTIONS_MOBILE = ['Hot', 'Warm', 'Cold'];
+const SOURCE_OPTIONS_MOBILE = [
+  'Meta Ads', 'Google Ads', 'Walk-In', 'Referral', 'WhatsApp', 'Website', 'Other',
+];
+
+const TEMP_ICONS: Record<string, React.ReactNode> = {
+  Hot:  <Flame className="w-3 h-3" />,
+  Warm: <Sun className="w-3 h-3" />,
+  Cold: <Snowflake className="w-3 h-3" />,
+};
+
 function MobileLeadsList({
   leads,
   isLoading,
   onOpenCreate,
+  openQuickEdit,
+  activeFilters,
+  searchValue,
+  onSearchChange,
+  onFilterChange,
+  onClearFilters,
+  sortBy,
+  sortOrder,
+  onSortChange,
+  page,
+  totalPages,
+  meta,
+  onPageChange,
 }: {
   leads: Lead[];
   isLoading: boolean;
   onOpenCreate: () => void;
+  openQuickEdit: (id: string) => void;
+  activeFilters: Record<string, any>;
+  searchValue: string;
+  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFilterChange: (key: keyof LeadFilters, value: string | undefined) => void;
+  onClearFilters: () => void;
+  sortBy: string;
+  sortOrder: string;
+  onSortChange: (field: string, order: string) => void;
+  page: number;
+  totalPages: number;
+  meta: { total: number; page: number; limit: number };
+  onPageChange: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const router = useRouter();
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+
+  const hasActiveFilters = !!(activeFilters.status || activeFilters.temperature || activeFilters.source || activeFilters.q || activeFilters.preferredCollege);
+
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Leads</h1>
-        <Button onClick={onOpenCreate} size="sm" className="bg-indigo-600">
-          + Add
-        </Button>
-      </div>
-      {isLoading ? (
-        Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-24 w-full rounded-xl" />
-        ))
-      ) : leads.length === 0 ? (
-        <EmptyState
-          icon="📋"
-          title="No leads yet"
-          description="Add your first student."
-          cta={{ label: 'Add Lead', onClick: onOpenCreate }}
-        />
-      ) : (
-        leads.map((lead, index) => (
-          <motion.div
-            key={lead._id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className={`bg-white rounded-xl border border-gray-200 border-l-4 p-4 cursor-pointer active:opacity-80 ${temperatureBorderClass(lead.temperature)}`}
-            onClick={() => router.push(`/leads/${lead._id}`)}
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="font-semibold text-gray-900">
-                  {lead.studentName}
-                </p>
-                <p className="text-sm text-gray-500 font-mono">{lead.phone}</p>
-              </div>
-              <div className="flex flex-col items-end gap-1">
-                <StatusBadge status={lead.status} />
-                <TemperatureBadge temperature={lead.temperature} />
-              </div>
-            </div>
-            {lead.followUp?.scheduledFor && (
-              <div className="mt-2 text-xs text-gray-500">
-                Follow-up: <FollowUpDateBadge date={lead.followUp.scheduledFor} />
-              </div>
+    <div className="flex flex-col h-full">
+      {/* ── Top: title + search ────────────────────────────── */}
+      <div className="space-y-3 pb-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-foreground">Leads</h1>
+            <p className="text-xs text-muted-foreground">{meta.total} total</p>
+          </div>
+        </div>
+
+        {/* Search bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            id="search-input"
+            placeholder="Search name, phone, email…"
+            value={searchValue}
+            onChange={onSearchChange}
+            className="pl-9 h-10 text-sm bg-card border-border"
+          />
+          {searchValue && (
+            <button
+              onClick={() => onSearchChange({ target: { value: '' } } as any)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground touch-target"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Active filter chips */}
+        {hasActiveFilters && (
+          <div className="flex flex-wrap gap-1.5">
+            {activeFilters.status && (
+              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-[10px] font-medium px-2 py-1 rounded-full">
+                {activeFilters.status}
+                <button onClick={() => onFilterChange('status', undefined)}><X className="w-2.5 h-2.5" /></button>
+              </span>
             )}
-          </motion.div>
-        ))
-      )}
+            {activeFilters.temperature && (
+              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-[10px] font-medium px-2 py-1 rounded-full">
+                {TEMP_ICONS[activeFilters.temperature]} {activeFilters.temperature}
+                <button onClick={() => onFilterChange('temperature', undefined)}><X className="w-2.5 h-2.5" /></button>
+              </span>
+            )}
+            {activeFilters.source && (
+              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-[10px] font-medium px-2 py-1 rounded-full">
+                {activeFilters.source}
+                <button onClick={() => onFilterChange('source', undefined)}><X className="w-2.5 h-2.5" /></button>
+              </span>
+            )}
+            <button
+              onClick={onClearFilters}
+              className="text-[10px] text-muted-foreground underline"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* ── Lead cards ────────────────────────────────────── */}
+      <div className="space-y-2 scroll-ios pb-28">
+        {isLoading ? (
+          Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-xl" />
+          ))
+        ) : leads.length === 0 ? (
+          <EmptyState
+            title="No leads found"
+            description={hasActiveFilters ? 'Try clearing your filters.' : 'Add your first student to get started.'}
+            cta={hasActiveFilters ? { label: 'Clear filters', onClick: onClearFilters } : { label: 'Add Lead', onClick: onOpenCreate }}
+          />
+        ) : (
+          leads.map((lead, index) => {
+            const phone = lead.phone || '';
+            const phoneDigits = phone.replace(/[^0-9+]/g, '');
+            const waUrl = `https://wa.me/${phoneDigits.replace(/^\+/, '')}`;
+            return (
+              <motion.div
+                key={lead._id}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.04 }}
+                className={cn(
+                  'bg-card rounded-xl border border-border border-l-4 p-3 cursor-pointer',
+                  'active:opacity-75 transition-opacity',
+                  temperatureBorderClass(lead.temperature),
+                )}
+                onClick={() => router.push(`/leads/${lead._id}`)}
+              >
+                {/* Row 1: name + status badge */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm text-foreground truncate leading-snug">
+                      {lead.studentName}
+                    </p>
+                    <p className="text-xs text-muted-foreground font-mono mt-0.5">{lead.phone}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                    <span
+                      className={cn(
+                        'badge-compact',
+                        {
+                          New: 'bg-blue-500/15 text-blue-600 dark:text-blue-400',
+                          Called: 'bg-purple-500/15 text-purple-600 dark:text-purple-400',
+                          Interested: 'bg-amber-500/15 text-amber-600 dark:text-amber-400',
+                          'Follow Up': 'bg-orange-500/15 text-orange-600 dark:text-orange-400',
+                          'Admission Confirmed': 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400',
+                          'Not Interested': 'bg-slate-500/15 text-slate-600 dark:text-slate-400',
+                          Closed: 'bg-rose-500/15 text-rose-600 dark:text-rose-400',
+                        }[lead.status] || 'bg-muted text-muted-foreground'
+                      )}
+                    >
+                      {lead.status}
+                    </span>
+                    <span
+                      className={cn(
+                        'badge-compact inline-flex items-center gap-0.5',
+                        {
+                          Hot: 'bg-rose-500/15 text-rose-600 dark:text-rose-400',
+                          Warm: 'bg-amber-500/15 text-amber-600 dark:text-amber-400',
+                          Cold: 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400',
+                        }[lead.temperature] || 'bg-muted text-muted-foreground'
+                      )}
+                    >
+                      {TEMP_ICONS[lead.temperature]}
+                      {lead.temperature}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Row 2: source + follow-up + quick actions */}
+                <div className="flex items-center justify-between mt-2 gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {lead.source && (
+                      <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded truncate max-w-[90px]">
+                        {lead.source}
+                      </span>
+                    )}
+                    {lead.followUp?.scheduledFor && (
+                      <span className="text-[10px] text-muted-foreground">
+                        <FollowUpDateBadge date={lead.followUp.scheduledFor} />
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Quick action buttons */}
+                  <div
+                    className="flex items-center gap-0.5 flex-shrink-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      onClick={() => window.open(`tel:${phoneDigits}`)}
+                      className="touch-target rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Call"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => window.open(waUrl, '_blank')}
+                      className="touch-target rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="WhatsApp"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => openQuickEdit(lead._id)}
+                      className="touch-target rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Quick edit"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-2">
+            <p className="text-xs text-muted-foreground">Page {page} of {totalPages}</p>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" disabled={page === 1} onClick={() => onPageChange((p) => p - 1)} className="h-8 text-xs">
+                ← Prev
+              </Button>
+              <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => onPageChange((p) => p + 1)} className="h-8 text-xs">
+                Next →
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── FAB: Add Lead ─────────────────────────────────── */}
+      <button
+        onClick={onOpenCreate}
+        className="fab-lg shadow-xl"
+        style={{ right: 'calc(1rem + env(safe-area-inset-right, 0px))' }}
+        aria-label="Add lead"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
+
+      {/* ── FAB: Filters ──────────────────────────────────── */}
+      <button
+        onClick={() => setIsFilterSheetOpen(true)}
+        className={cn(
+          'fab-md shadow-xl',
+          hasActiveFilters ? 'bg-primary ring-2 ring-primary/50' : 'bg-card text-foreground border border-border',
+        )}
+        style={{ right: 'calc(5rem + env(safe-area-inset-right, 0px))' }}
+        aria-label="Filters and sort"
+      >
+        <SlidersHorizontal className="w-5 h-5" />
+        {hasActiveFilters && (
+          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-destructive rounded-full text-[8px] text-white flex items-center justify-center font-bold">
+            !
+          </span>
+        )}
+      </button>
+
+      {/* ── Filter Bottom Sheet ───────────────────────────── */}
+      <AnimatePresence>
+        {isFilterSheetOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="sheet-backdrop"
+              onClick={() => setIsFilterSheetOpen(false)}
+            />
+            {/* Sheet */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-2xl border-t border-border shadow-xl scroll-ios"
+              style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+            >
+              {/* Sheet handle */}
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="w-10 h-1 rounded-full bg-border" />
+              </div>
+
+              <div className="px-4 pt-2 pb-4 flex items-center justify-between">
+                <p className="font-semibold text-foreground text-base">Filters &amp; Sort</p>
+                <button onClick={() => setIsFilterSheetOpen(false)} className="touch-target text-muted-foreground">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="px-4 space-y-4 max-h-[65vh] overflow-y-auto scroll-ios">
+                {/* Status */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</p>
+                  <div className="flex flex-wrap gap-2">
+                    {STATUS_OPTIONS_MOBILE.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => onFilterChange('status', activeFilters.status === s ? undefined : s)}
+                        className={cn(
+                          'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                          activeFilters.status === s
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary',
+                        )}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Temperature */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Temperature</p>
+                  <div className="flex gap-2">
+                    {TEMP_OPTIONS_MOBILE.map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => onFilterChange('temperature', activeFilters.temperature === t ? undefined : t)}
+                        className={cn(
+                          'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium border transition-colors',
+                          activeFilters.temperature === t
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-muted text-muted-foreground border-border',
+                        )}
+                      >
+                        {TEMP_ICONS[t]} {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Source */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Source</p>
+                  <div className="flex flex-wrap gap-2">
+                    {SOURCE_OPTIONS_MOBILE.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => onFilterChange('source', activeFilters.source === s ? undefined : s)}
+                        className={cn(
+                          'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                          activeFilters.source === s
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary',
+                        )}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Sort */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sort</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { value: 'updatedAt', label: 'Last updated' },
+                      { value: 'createdAt', label: 'Newest created' },
+                      { value: 'studentName', label: 'Name' },
+                      { value: 'temperature', label: 'Temperature' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => onSortChange(opt.value, sortOrder)}
+                        className={cn(
+                          'py-2 px-3 rounded-xl text-xs font-medium border transition-colors text-left',
+                          sortBy === opt.value
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-muted text-muted-foreground border-border',
+                        )}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => onSortChange(sortBy, 'desc')}
+                      className={cn(
+                        'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium border transition-colors',
+                        sortOrder === 'desc' ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted text-muted-foreground border-border',
+                      )}
+                    >
+                      <ArrowUpDown className="w-3 h-3" /> Newest first
+                    </button>
+                    <button
+                      onClick={() => onSortChange(sortBy, 'asc')}
+                      className={cn(
+                        'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium border transition-colors',
+                        sortOrder === 'asc' ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted text-muted-foreground border-border',
+                      )}
+                    >
+                      <ArrowUpDown className="w-3 h-3" /> Oldest first
+                    </button>
+                  </div>
+                </div>
+
+                {/* Clear all */}
+                {hasActiveFilters && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => { onClearFilters(); setIsFilterSheetOpen(false); }}
+                  >
+                    Clear all filters
+                  </Button>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

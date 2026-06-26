@@ -100,17 +100,13 @@ export default function StaffPage() {
     <div className="space-y-4 max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Staff Management</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Staff Management</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Manage staff accounts and permissions
           </p>
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger>
-            <Button className="bg-indigo-600 hover:bg-indigo-700">
-              + Add Staff
-            </Button>
-          </DialogTrigger>
+          <DialogTrigger render={<button type="button" className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-700">+ Add Staff</button>} />
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Create Staff Account</DialogTitle>
@@ -226,21 +222,14 @@ export default function StaffPage() {
                     className="border-b border-border hover:bg-muted/30 transition-colors"
                   >
                     <td className="px-4 py-3 font-medium text-foreground">{user.name}</td>
-                    <td className="px-4 py-3 text-gray-500">{user.email}</td>
-                    <td className="px-4 py-3 capitalize">{user.role}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{user.email}</td>
+                    <td className="px-4 py-3 capitalize text-muted-foreground">{user.role}</td>
                     <td className="px-4 py-3">
-                      <Badge
-                        variant={user.isActive ? 'default' : 'secondary'}
-                        className={
-                          user.isActive
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-500'
-                        }
-                      >
+                      <Badge variant={user.isActive ? 'default' : 'secondary'}>
                         {user.isActive ? 'Active' : 'Disabled'}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs">
+                    <td className="px-4 py-3 text-muted-foreground text-xs">
                       {user.lastLoginAt
                         ? format(new Date(user.lastLoginAt), 'MMM d, h:mm a')
                         : 'Never'}

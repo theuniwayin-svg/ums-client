@@ -197,4 +197,52 @@
   input, textarea, select {
     @apply bg-background dark:bg-card;
   }
+
+  /* ── Mobile-specific utilities ─────────────────────────────── */
+
+  /* Safe-area padding for iOS notch / home indicator */
+  .safe-top    { padding-top:    env(safe-area-inset-top, 0px); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .safe-left   { padding-left:   env(safe-area-inset-left, 0px); }
+  .safe-right  { padding-right:  env(safe-area-inset-right, 0px); }
+
+  /* Floating Action Button — circle, fixed bottom-right */
+  .fab-lg {
+    @apply fixed z-50 flex items-center justify-center rounded-full shadow-lg
+           bg-primary text-primary-foreground
+           transition-all duration-200 active:scale-95
+           w-14 h-14;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  }
+  .fab-md {
+    @apply fixed z-50 flex items-center justify-center rounded-full shadow-lg
+           bg-primary text-primary-foreground
+           transition-all duration-200 active:scale-95
+           w-12 h-12;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Touch target — minimum 44×44px per Apple HIG */
+  .touch-target {
+    @apply min-w-[44px] min-h-[44px] flex items-center justify-center;
+  }
+
+  /* Smooth native-feel scrolling on iOS */
+  .scroll-ios {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  /* Prevent text selection on interactive elements */
+  .no-select { user-select: none; -webkit-user-select: none; }
+
+  /* Compact badge for dense mobile rows */
+  .badge-compact {
+    @apply inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold leading-none;
+  }
+
+  /* Bottom sheet backdrop */
+  .sheet-backdrop {
+    @apply fixed inset-0 z-40 bg-black/50 backdrop-blur-sm;
+  }
 }

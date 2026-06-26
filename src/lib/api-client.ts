@@ -1,11 +1,8 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/auth.store';
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
-
 const apiClient = axios.create({
-  baseURL: `${API_BASE_URL}/api/v1`,
+  baseURL: '/api/v1',
   withCredentials: true, // send HttpOnly cookies
   headers: {
     'Content-Type': 'application/json',
@@ -64,7 +61,7 @@ apiClient.interceptors.response.use(
 
       try {
         const { data } = await axios.post(
-          `${API_BASE_URL}/api/v1/auth/refresh`,
+          '/api/v1/auth/refresh',
           {},
           { withCredentials: true },
         );

@@ -11,16 +11,36 @@ function Dialog({ ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
-function DialogTrigger({ ...props }: DialogPrimitive.Trigger.Props) {
-  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
+function DialogTrigger({ render, children, ...props }: DialogPrimitive.Trigger.Props & { render?: React.ReactElement }) {
+  if (render) {
+    return (
+      <DialogPrimitive.Trigger data-slot="dialog-trigger" render={render} nativeButton={true}>
+        {children}
+      </DialogPrimitive.Trigger>
+    )
+  }
+
+  return (
+    <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props}>
+      {children}
+    </DialogPrimitive.Trigger>
+  )
 }
 
 function DialogPortal({ ...props }: DialogPrimitive.Portal.Props) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
 }
 
-function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
-  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
+function DialogClose({ render, children, ...props }: DialogPrimitive.Close.Props & { render?: React.ReactElement }) {
+  if (render) {
+    return (
+      <DialogPrimitive.Close data-slot="dialog-close" render={render} nativeButton={true}>
+        {children}
+      </DialogPrimitive.Close>
+    )
+  }
+
+  return <DialogPrimitive.Close data-slot="dialog-close" {...props}>{children}</DialogPrimitive.Close>
 }
 
 function DialogOverlay({
@@ -63,10 +83,9 @@ function DialogContent({
           <DialogPrimitive.Close
             data-slot="dialog-close"
             render={
-              <Button
-                variant="ghost"
-                className="absolute top-2 right-2"
-                size="icon-sm"
+              <button
+                type="button"
+                className="absolute top-2 right-2 inline-flex size-7 items-center justify-center rounded-md hover:bg-muted"
               />
             }
           >

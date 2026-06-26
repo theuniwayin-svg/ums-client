@@ -231,7 +231,7 @@ export function LeadInfoEditor({
           <Label htmlFor={`source-${lead._id}`}>Source</Label>
           <Select
             value={draft.source}
-            onValueChange={(value) => handleFieldChange('source', value)}
+            onValueChange={(value) => value && handleFieldChange('source', value)}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select source" />
@@ -259,12 +259,12 @@ export function LeadInfoEditor({
 
         {canEditAssignee && (
           <div className="space-y-1.5 md:col-span-2">
-            <Label className="text-xs uppercase tracking-wide text-gray-500">
+            <Label className="text-xs uppercase tracking-wide text-muted-foreground">
               Assigned To
             </Label>
             <Select
               value={draft.assignedTo || 'unassigned'}
-              onValueChange={(value) => handleFieldChange('assignedTo', value === 'unassigned' ? '' : value)}
+              onValueChange={(value) => handleFieldChange('assignedTo', value === 'unassigned' ? '' : (value ?? ''))}
             >
               <SelectTrigger className="w-full">
                 <span className="truncate">{assigneeLabel}</span>

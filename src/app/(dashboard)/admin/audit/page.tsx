@@ -50,8 +50,8 @@ export default function AuditPage() {
     <div className="space-y-4 max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Audit Log</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Audit Log</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Admin actions and system events
           </p>
         </div>
@@ -112,23 +112,14 @@ export default function AuditPage() {
                       className="border-b border-border hover:bg-muted/30 transition-colors"
                     >
                       <td className="px-4 py-3">
-                        <Badge
-                          variant="secondary"
-                          className={
-                            log.action === 'DUPLICATE_OVERRIDE'
-                              ? 'bg-amber-100 text-amber-700'
-                              : log.action.includes('DISABLED')
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-gray-100 text-gray-700'
-                          }
-                        >
+                        <Badge variant={log.action === 'DUPLICATE_OVERRIDE' ? 'destructive' : 'secondary'}>
                           {log.action.replace(/_/g, ' ')}
                         </Badge>
                       </td>
                       <td className="px-4 py-3 font-medium">
                         {log.performedByName}
                       </td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">
+                      <td className="px-4 py-3 text-muted-foreground text-xs">
                         {log.action === 'DUPLICATE_OVERRIDE' &&
                         log.metadata?.duplicateLeadId ? (
                           <Link
@@ -146,7 +137,7 @@ export default function AuditPage() {
                           '—'
                         )}
                       </td>
-                      <td className="px-4 py-3 text-gray-400 text-xs">
+                      <td className="px-4 py-3 text-muted-foreground text-xs">
                         {format(new Date(log.createdAt), 'MMM d, h:mm a')}
                       </td>
                     </tr>

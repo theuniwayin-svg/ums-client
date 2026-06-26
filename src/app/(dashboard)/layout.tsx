@@ -5,7 +5,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
@@ -32,6 +31,8 @@ const adminNavItems = [
   { href: '/admin/audit', label: 'Audit Log', Icon: Search },
 ];
 
+type SidebarState = 'auto' | 'open' | 'closed';
+
 export default function DashboardLayout({
   children,
 }: {
@@ -40,13 +41,40 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarState, setSidebarState] = useState<SidebarState>('auto');
   const { data: pendingFollowUps } = usePendingFollowUps();
   const pendingCount = Array.isArray(pendingFollowUps)
     ? pendingFollowUps.length
     : 0;
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
+  const sidebarShellClass =
+    sidebarState === 'auto'
+      ? 'w-0 overflow-hidden md:w-64 md:overflow-visible'
+      : sidebarState === 'open'
+        ? 'w-64'
+        : 'w-0 overflow-hidden md:w-16 md:overflow-visible';
+  const sidebarContentClass =
+    sidebarState === 'auto'
+      ? 'hidden md:block'
+      : sidebarState === 'open'
+        ? 'block'
+        : 'hidden';
+  const sidebarBadgeClass =
+    sidebarState === 'auto'
+      ? 'hidden md:inline-flex'
+      : sidebarState === 'open'
+        ? 'inline-flex'
+        : 'hidden';
+
+  const toggleSidebar = () => {
+    setSidebarState((current) => {
+      if (current === 'auto') {
+        return window.innerWidth < 768 ? 'open' : 'closed';
+      }
+      return current === 'open' ? 'closed' : 'open';
+    });
+  };
 
   const handleLogout = async () => {
     try {
@@ -65,7 +93,7 @@ export default function DashboardLayout({
       <aside
         className={cn(
           'fixed md:relative z-40 flex flex-col bg-card border-r border-border transition-all duration-300 h-full',
-          sidebarOpen ? 'w-64' : 'w-16 max-md:hidden',
+          sidebarShellClass,
         )}
       >
         {/* Logo */}
@@ -73,11 +101,14 @@ export default function DashboardLayout({
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
             <span className="text-primary-foreground font-bold text-sm">U</span>
           </div>
-          {sidebarOpen && (
-            <span className="ml-3 font-semibold text-foreground truncate">
-              Uniwayin UMS
-            </span>
-          )}
+          <span
+            className={cn(
+              'ml-3 font-semibold text-foreground truncate',
+              sidebarContentClass,
+            )}
+          >
+            Uniwayin UMS
+          </span>
         </div>
 
         {/* Nav */}
@@ -94,13 +125,13 @@ export default function DashboardLayout({
               )}
             >
               <item.Icon className="w-5 h-5 flex-shrink-0" />
-              {sidebarOpen && (
-                <span className="flex-1">{item.label}</span>
-              )}
-              {sidebarOpen && item.showBadge && pendingCount > 0 && (
+              <span className={cn('flex-1', sidebarContentClass)}>
+                {item.label}
+              </span>
+              {item.showBadge && pendingCount > 0 && (
                 <Badge
                   variant="destructive"
-                  className="ml-auto text-xs"
+                  className={cn('ml-auto text-xs', sidebarBadgeClass)}
                 >
                   {pendingCount}
                 </Badge>
@@ -109,12 +140,15 @@ export default function DashboardLayout({
           ))}
 
           {isAdmin && (
-            <div className={sidebarOpen ? 'pt-4' : 'pt-2'}>
-              {sidebarOpen && (
-                <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  Admin
-                </p>
-              )}
+            <div className={sidebarState === 'closed' ? 'pt-2' : 'pt-4'}>
+              <p
+                className={cn(
+                  'px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2',
+                  sidebarContentClass,
+                )}
+              >
+                Admin
+              </p>
               {adminNavItems.map((item) => (
                 <Link
                   key={item.href}
@@ -127,7 +161,7 @@ export default function DashboardLayout({
                   )}
                 >
                   <item.Icon className="w-5 h-5 flex-shrink-0" />
-                  {sidebarOpen && <span>{item.label}</span>}
+                  <span className={sidebarContentClass}>{item.label}</span>
                 </Link>
               ))}
             </div>
@@ -143,16 +177,19 @@ export default function DashboardLayout({
                   {user?.name?.[0]?.toUpperCase() || 'U'}
                 </span>
               </div>
-              {sidebarOpen && (
-                <div className="flex-1 text-left min-w-0">
-                  <p className="font-medium text-foreground truncate">
-                    {user?.name || 'User'}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate capitalize">
-                    {user?.role}
-                  </p>
-                </div>
-              )}
+              <div
+                className={cn(
+                  'flex-1 text-left min-w-0',
+                  sidebarContentClass,
+                )}
+              >
+                <p className="font-medium text-foreground truncate">
+                  {user?.name || 'User'}
+                </p>
+                <p className="text-xs text-muted-foreground truncate capitalize">
+                  {user?.role}
+                </p>
+              </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => router.push('/settings')}>Settings</DropdownMenuItem>
@@ -171,14 +208,19 @@ export default function DashboardLayout({
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden md:ml-0">
         {/* Topbar */}
-        <header className="h-14 md:h-16 bg-card border-b border-border flex items-center px-4 md:px-6 flex-shrink-0">
+        <header className="h-14 md:h-16 bg-card border-b border-border flex items-center px-3 md:px-6 flex-shrink-0 safe-top">
           <div className="flex items-center gap-2 md:gap-4 w-full">
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg hover:bg-muted text-foreground md:hidden"
-              title={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+              onClick={toggleSidebar}
+              className="p-2 rounded-lg hover:bg-muted text-foreground flex-shrink-0"
+              title="Toggle sidebar"
             >
-              {sidebarOpen ? (
+              {sidebarState === 'auto' ? (
+                <>
+                  <X className="hidden h-5 w-5 md:block" />
+                  <Menu className="h-5 w-5 md:hidden" />
+                </>
+              ) : sidebarState === 'open' ? (
                 <X className="h-5 w-5" />
               ) : (
                 <Menu className="h-5 w-5" />
@@ -190,8 +232,8 @@ export default function DashboardLayout({
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto bg-background">
-          <div className="p-4 md:p-6 max-w-7xl mx-auto">
+        <main className="flex-1 overflow-auto bg-background safe-bottom">
+          <div className="p-4 md:p-6 max-w-7xl mx-auto pb-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={pathname}
@@ -208,10 +250,11 @@ export default function DashboardLayout({
       </div>
 
       {/* Mobile sidebar backdrop */}
-      {sidebarOpen && (
+      {sidebarState === 'open' && (
         <div
           className="fixed inset-0 bg-black/50 md:hidden z-30"
-          onClick={() => setSidebarOpen(false)}
+          onClick={() => setSidebarState('closed')}
+          aria-hidden="true"
         />
       )}
     </div>

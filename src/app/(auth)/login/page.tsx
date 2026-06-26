@@ -101,7 +101,7 @@ export default function LoginPage() {
             </div>
             <Button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700"
+              className="w-full"
               disabled={isSubmitting}
             >
               {isSubmitting ? (

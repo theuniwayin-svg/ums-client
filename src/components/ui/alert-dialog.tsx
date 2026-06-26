@@ -10,9 +10,19 @@ function AlertDialog({ ...props }: AlertDialogPrimitive.Root.Props) {
   return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
 }
 
-function AlertDialogTrigger({ ...props }: AlertDialogPrimitive.Trigger.Props) {
+function AlertDialogTrigger({ render, children, ...props }: AlertDialogPrimitive.Trigger.Props & { render?: React.ReactElement }) {
+  if (render) {
+    return (
+      <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" render={render} nativeButton={true}>
+        {children}
+      </AlertDialogPrimitive.Trigger>
+    )
+  }
+
   return (
-    <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />
+    <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props}>
+      {children}
+    </AlertDialogPrimitive.Trigger>
   )
 }
 
@@ -158,16 +168,23 @@ function AlertDialogCancel({
   className,
   variant = "outline",
   size = "default",
+  render,
+  children,
   ...props
 }: AlertDialogPrimitive.Close.Props &
-  Pick<React.ComponentProps<typeof Button>, "variant" | "size">) {
+  Pick<React.ComponentProps<typeof Button>, "variant" | "size"> & { render?: React.ReactElement }) {
+  if (render) {
+    return (
+      <AlertDialogPrimitive.Close data-slot="alert-dialog-cancel" render={render} nativeButton={true}>
+        {children}
+      </AlertDialogPrimitive.Close>
+    )
+  }
+
   return (
-    <AlertDialogPrimitive.Close
-      data-slot="alert-dialog-cancel"
-      className={cn(className)}
-      render={<Button variant={variant} size={size} />}
-      {...props}
-    />
+    <AlertDialogPrimitive.Close data-slot="alert-dialog-cancel" className={cn(className)} {...props}>
+      {children ?? <Button variant={variant} size={size} />}
+    </AlertDialogPrimitive.Close>
   )
 }
 

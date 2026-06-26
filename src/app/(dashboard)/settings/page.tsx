@@ -10,7 +10,7 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-lg mx-auto space-y-4">
-      <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+      <h1 className="text-2xl font-bold text-foreground">Settings</h1>
 
       <Card>
         <CardHeader>
@@ -18,15 +18,15 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-500">Name</span>
+            <span className="text-muted-foreground">Name</span>
             <span className="font-medium">{user?.name}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">Email</span>
+            <span className="text-muted-foreground">Email</span>
             <span className="font-medium">{user?.email}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">Role</span>
+            <span className="text-muted-foreground">Role</span>
             <Badge className="capitalize">{user?.role}</Badge>
           </div>
         </CardContent>
@@ -40,17 +40,17 @@ export default function SettingsPage() {
           <div className="space-y-4 text-sm">
             {SHORTCUT_GROUPS.map((group) => (
               <div key={group.title} className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {group.title}
                 </p>
                 <div className="space-y-2">
                   {group.items.map((item) => (
                     <div key={`${group.title}-${item.key}`} className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-gray-600">{item.description}</p>
-                        <p className="text-xs text-gray-400">{item.context}</p>
+                        <p className="text-foreground">{item.description}</p>
+                        <p className="text-xs text-muted-foreground">{item.context}</p>
                       </div>
-                      <kbd className="px-2 py-0.5 bg-gray-100 rounded text-xs font-mono">
+                      <kbd className="rounded border border-border bg-muted px-2 py-0.5 font-mono text-xs text-foreground">
                         {item.key}
                       </kbd>
                     </div>

@@ -1,6 +1,5 @@
 'use client';
 
-import { useTheme } from '@/hooks/use-theme';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -8,19 +7,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Moon, Sun, Monitor } from 'lucide-react';
+import { useTheme } from '@/hooks/use-theme';
+import { Monitor, Moon, Sun } from 'lucide-react';
 
 export function ThemeToggle() {
   const { theme, setTheme, mounted } = useTheme();
 
   if (!mounted) {
     return (
-      <Button
-        variant="ghost"
-        size="icon"
-        className="rounded-full"
-        disabled
-      >
+      <Button variant="ghost" size="icon" className="rounded-full" disabled>
         <Sun className="h-5 w-5" />
       </Button>
     );
@@ -30,10 +25,9 @@ export function ThemeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full"
+          <button
+            type="button"
+            className="inline-flex size-8 items-center justify-center rounded-full hover:bg-muted"
             title="Toggle theme"
           />
         }
