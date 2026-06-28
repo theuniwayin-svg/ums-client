@@ -129,7 +129,7 @@ export default function StaffPage() {
                 <Input
                   {...register('email')}
                   type="email"
-                  placeholder="jane@uniwayin.com"
+                  placeholder="jane@example.com"
                 />
                 {errors.email && (
                   <p className="text-xs text-red-500 mt-1">

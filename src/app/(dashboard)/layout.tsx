@@ -18,6 +18,7 @@ import { api } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { usePendingFollowUps } from '@/hooks/use-leads';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { BrandLogo } from '@/components/brand-logo';
 import { Menu, X, Users, Bell, BarChart3, User, Search } from 'lucide-react';
 
 const navItems = [
@@ -98,17 +99,12 @@ export default function DashboardLayout({
       >
         {/* Logo */}
         <div className="flex items-center h-16 px-4 border-b border-border">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-            <span className="text-primary-foreground font-bold text-sm">U</span>
-          </div>
-          <span
-            className={cn(
-              'ml-3 font-semibold text-foreground truncate',
-              sidebarContentClass,
-            )}
-          >
-            Uniwayin UMS
-          </span>
+          <BrandLogo
+            variant={sidebarState === 'closed' ? 'mark' : 'full'}
+            className={cn('min-w-0', sidebarContentClass)}
+            markClassName={sidebarState === 'closed' ? 'h-9 w-9' : undefined}
+            priority
+          />
         </div>
 
         {/* Nav */}

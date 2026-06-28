@@ -6,8 +6,15 @@ import { Providers } from '@/components/providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'UMS — Uniwayin Management System',
-  description: 'Lead & Admissions CRM for Uniwayin',
+  title: {
+    default: 'UMS',
+    template: '%s | UMS',
+  },
+  description: 'Lead and admissions CRM',
+  icons: {
+    icon: '/brand/icon.svg',
+    apple: '/brand/icon.svg',
+  },
 };
 
 export default function RootLayout({

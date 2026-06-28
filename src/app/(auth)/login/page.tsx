@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoginSchema, type LoginDto } from '@/schemas/auth.schema';
 import { api } from '@/lib/api-client';
 import { useAuthStore } from '@/store/auth.store';
+import { BrandLogo } from '@/components/brand-logo';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -56,13 +57,15 @@ export default function LoginPage() {
       transition={{ duration: 0.4 }}
       className="w-full max-w-md px-4"
     >
-      <Card className="shadow-soft border border-border">
+      <Card className="shadow-soft border border-border bg-card/95 backdrop-blur-sm">
         <CardHeader className="text-center pb-2">
-          <div className="mx-auto mb-4 h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-xl">U</span>
+          <div className="mx-auto mb-5 rounded-2xl border border-border/60 bg-background/80 px-4 py-3 shadow-sm">
+            <BrandLogo variant="full" priority />
           </div>
-          <CardTitle className="text-2xl font-bold text-foreground">Uniwayin UMS</CardTitle>
-          <CardDescription>Sign in to manage your leads</CardDescription>
+          <CardTitle className="text-2xl font-semibold text-foreground">
+            Welcome back
+          </CardTitle>
+          <CardDescription>Sign in to manage leads and follow-ups</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
@@ -76,7 +79,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@uniwayin.com"
+                placeholder="admin@example.com"
                 autoComplete="email"
                 {...register('email')}
               />
