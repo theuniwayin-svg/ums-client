@@ -460,6 +460,8 @@ export default function LeadsPage() {
           totalPages={totalPages}
           meta={meta}
           onPageChange={setPage}
+          isAdmin={isAdmin}
+          staffUsers={staffUsers}
         />
         <CreateLeadModal open={isCreateLeadOpen} onClose={closeCreateLead} />
         <QuickEditDrawer
@@ -592,6 +594,7 @@ export default function LeadsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All assignees</SelectItem>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
                     {staffUsers.map((staff: any) => (
                       <SelectItem key={staff._id} value={staff._id}>
                         {staff.name} · {staff.role}
@@ -953,6 +956,8 @@ function MobileLeadsList({
   totalPages,
   meta,
   onPageChange,
+  isAdmin,
+  staffUsers,
 }: {
   leads: Lead[];
   isLoading: boolean;
@@ -970,6 +975,8 @@ function MobileLeadsList({
   totalPages: number;
   meta: { total: number; page: number; limit: number };
   onPageChange: React.Dispatch<React.SetStateAction<number>>;
+  isAdmin: boolean;
+  staffUsers: any[];
 }) {
   const router = useRouter();
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
@@ -1303,6 +1310,36 @@ function MobileLeadsList({
                     ))}
                   </div>
                 </div>
+
+                {/* Assigned To (Admins Only) */}
+                {isAdmin && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Assigned To</p>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { _id: undefined, name: 'All' },
+                        { _id: 'unassigned', name: 'Unassigned' },
+                        ...staffUsers
+                      ].map((staff) => {
+                        const isSelected = activeFilters.assignedTo === staff._id || (!activeFilters.assignedTo && !staff._id);
+                        return (
+                          <button
+                            key={staff._id || 'all'}
+                            onClick={() => onFilterChange('assignedTo', staff._id)}
+                            className={cn(
+                              'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                              isSelected
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'bg-muted text-muted-foreground border-border hover:border-primary hover:text-primary',
+                            )}
+                          >
+                            {staff.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 {/* Sort */}
                 <div className="space-y-2">
