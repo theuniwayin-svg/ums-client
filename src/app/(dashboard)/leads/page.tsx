@@ -440,9 +440,9 @@ export default function LeadsPage() {
     },
   });
 
-  if (isMobile) {
-    return (
-      <>
+  return (
+    <>
+      <div className="block md:hidden h-full">
         <MobileLeadsList
           leads={leads}
           isLoading={isLoading}
@@ -463,18 +463,9 @@ export default function LeadsPage() {
           isAdmin={isAdmin}
           staffUsers={staffUsers}
         />
-        <CreateLeadModal open={isCreateLeadOpen} onClose={closeCreateLead} />
-        <QuickEditDrawer
-          open={isQuickEditOpen}
-          leadId={quickEditLeadId}
-          onClose={closeQuickEdit}
-        />
-      </>
-    );
-  }
+      </div>
 
-  return (
-    <div className="space-y-4">
+      <div className="hidden md:block space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
@@ -867,7 +858,13 @@ export default function LeadsPage() {
         </div>
       )}
 
-      {/* Modals */}
+      {/* Keyboard shortcut hint */}
+      <div className="fixed bottom-6 right-6 text-xs text-muted-foreground hidden md:block">
+        Press <kbd className="px-1 py-0.5 bg-muted border border-border rounded">?</kbd> for shortcuts
+      </div>
+      </div>
+
+      {/* Shared Modals for both Desktop and Mobile */}
       <CreateLeadModal open={isCreateLeadOpen} onClose={closeCreateLead} />
       <QuickEditDrawer
         open={isQuickEditOpen}
@@ -913,12 +910,7 @@ export default function LeadsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Keyboard shortcut hint */}
-      <div className="fixed bottom-6 right-6 text-xs text-muted-foreground hidden md:block">
-        Press <kbd className="px-1 py-0.5 bg-muted border border-border rounded">?</kbd> for shortcuts
-      </div>
-    </div>
+    </>
   );
 }
 

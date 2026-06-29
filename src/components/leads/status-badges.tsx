@@ -34,7 +34,7 @@ export function StatusBadge({ status }: { status: string }) {
     <span
       className={cn(
         'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-        STATUS_STYLES[status] || 'bg-gray-100 text-gray-700',
+        STATUS_STYLES[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
       )}
     >
       {status}
@@ -56,7 +56,7 @@ export function TemperatureBadge({ temperature }: { temperature: string }) {
 }
 
 export function temperatureBorderClass(temperature: string) {
-  return TEMPERATURE_BORDER[temperature] || 'border-l-gray-300';
+  return TEMPERATURE_BORDER[temperature] || 'border-l-gray-300 dark:border-l-gray-700';
 }
 
 export function FollowUpDateBadge({ date }: { date?: string }) {
