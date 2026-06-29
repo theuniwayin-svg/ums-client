@@ -129,7 +129,7 @@ export default function LeadDetailPage() {
   });
   const [followUpNote, setFollowUpNote] = useState('');
 
-  const { data: lead, isLoading } = useLead(id);
+  const { data: lead, isLoading, isError, error: leadError } = useLead(id);
   const { data: activitiesPages, fetchNextPage, hasNextPage } = useLeadActivities(id);
   const { data: notes } = useLeadNotes(id);
 
@@ -223,6 +223,34 @@ export default function LeadDetailPage() {
     },
     !!lead,
   );
+
+  // ── Access denied / not found ──────────────────────────────────────────────
+  if (isError) {
+    const status = (leadError as any)?.response?.status;
+    const isAccessDenied = status === 403 || status === 404;
+    return (
+      <div className="max-w-md mx-auto mt-16 text-center space-y-4 px-4">
+        <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+          <ArrowLeft className="w-6 h-6 text-destructive" />
+        </div>
+        <h1 className="text-xl font-bold text-foreground">
+          {isAccessDenied ? 'Access Removed' : 'Lead Not Found'}
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          {isAccessDenied
+            ? 'You no longer have access to this lead. It may have been unassigned from you.'
+            : 'This lead could not be found. It may have been deleted or the link is invalid.'}
+        </p>
+        <button
+          onClick={() => router.push('/leads')}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Leads
+        </button>
+      </div>
+    );
+  }
 
   // ── Loading skeleton ───────────────────────────────────────────────────────
   if (isLoading || !lead) {

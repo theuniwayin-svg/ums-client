@@ -137,7 +137,8 @@ export function LeadInfoEditor({
     }
 
     if (canEditAssignee && draft.assignedTo !== getAssignedToId(lead.assignedTo)) {
-      payload.assignedTo = draft.assignedTo;
+      // Send null (not empty string) when unassigning — empty string causes a MongoDB CastError
+      payload.assignedTo = draft.assignedTo || null;
     }
 
     if (Object.keys(payload).length === 1) {
@@ -158,8 +159,8 @@ export function LeadInfoEditor({
   return (
     <div className="space-y-4">
       <div className="space-y-1">
-        <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-        <p className="text-sm text-gray-500">{description}</p>
+        <h3 className="text-base font-semibold text-foreground">{title}</h3>
+        <p className="text-sm text-muted-foreground">{description}</p>
       </div>
 
       <div className={layout === 'compact' ? 'grid gap-3' : 'grid gap-4 md:grid-cols-2'}>

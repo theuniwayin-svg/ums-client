@@ -113,12 +113,16 @@ export default function LeadsPage() {
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState(activeFilters.sortBy || 'updatedAt');
   const [sortOrder, setSortOrder] = useState(activeFilters.order || 'desc');
-  const [isFilterOpen, setIsFilterOpen] = useState(() => {
+  const [isFilterOpen, setIsFilterOpen] = useState(true);
+
+  useEffect(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('leadsFilterOpen') !== 'false';
+      const saved = localStorage.getItem('leadsFilterOpen');
+      if (saved === 'false') {
+        setIsFilterOpen(false);
+      }
     }
-    return true;
-  });
+  }, []);
 
   const { data, isLoading } = useLeads({ ...activeFilters, page, limit: 20 });
   const leads: Lead[] = data?.data || [];
@@ -983,25 +987,7 @@ function MobileLeadsList({
           </div>
         </div>
 
-        {/* Search bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            id="search-input"
-            placeholder="Search name, phone, email…"
-            value={searchValue}
-            onChange={onSearchChange}
-            className="pl-9 h-10 text-sm bg-card border-border"
-          />
-          {searchValue && (
-            <button
-              onClick={() => onSearchChange({ target: { value: '' } } as any)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground touch-target"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
+        {/* Top bar search removed, moved to floating bottom sheet */}
 
         {/* Active filter chips */}
         {hasActiveFilters && (
@@ -1183,13 +1169,14 @@ function MobileLeadsList({
       <button
         onClick={() => setIsFilterSheetOpen(true)}
         className={cn(
-          'fab-md shadow-xl',
+          'fab-md shadow-xl w-auto px-4 flex items-center gap-2',
           hasActiveFilters ? 'bg-primary ring-2 ring-primary/50' : 'bg-card text-foreground border border-border',
         )}
-        style={{ right: 'calc(5rem + env(safe-area-inset-right, 0px))' }}
-        aria-label="Filters and sort"
+        style={{ right: 'calc(1rem + env(safe-area-inset-right, 0px))', bottom: 'calc(5.5rem + env(safe-area-inset-bottom, 0px))' }}
+        aria-label="Search, filters and sort"
       >
-        <SlidersHorizontal className="w-5 h-5" />
+        <Search className="w-4 h-4" />
+        <span className="text-sm font-medium">Search & Filter</span>
         {hasActiveFilters && (
           <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-destructive rounded-full text-[8px] text-white flex items-center justify-center font-bold">
             !
@@ -1224,13 +1211,36 @@ function MobileLeadsList({
               </div>
 
               <div className="px-4 pt-2 pb-4 flex items-center justify-between">
-                <p className="font-semibold text-foreground text-base">Filters &amp; Sort</p>
+                <p className="font-semibold text-foreground text-base">Search &amp; Filters</p>
                 <button onClick={() => setIsFilterSheetOpen(false)} className="touch-target text-muted-foreground">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="px-4 space-y-4 max-h-[65vh] overflow-y-auto scroll-ios">
+              <div className="px-4 space-y-5 max-h-[70vh] overflow-y-auto scroll-ios">
+                {/* Search */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Search</p>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="mobile-search-input"
+                      placeholder="Name, phone, email, or college…"
+                      value={searchValue}
+                      onChange={onSearchChange}
+                      className="pl-9 h-11 text-sm bg-background border-border"
+                    />
+                    {searchValue && (
+                      <button
+                        onClick={() => onSearchChange({ target: { value: '' } } as any)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground touch-target h-full"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 {/* Status */}
                 <div className="space-y-2">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</p>
