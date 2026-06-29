@@ -14,7 +14,11 @@ apiClient.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().accessToken;
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      if (config.headers && typeof config.headers.set === 'function') {
+        config.headers.set('Authorization', `Bearer ${token}`);
+      } else {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -36,7 +40,11 @@ const processQueue = (error: unknown, token: string | null = null) => {
       item.reject(error);
     } else {
       // Re-execute the original request with the fresh token
-      item.config.headers.Authorization = `Bearer ${token}`;
+      if (item.config.headers && typeof item.config.headers.set === 'function') {
+        item.config.headers.set('Authorization', `Bearer ${token}`);
+      } else {
+        item.config.headers.Authorization = `Bearer ${token}`;
+      }
       item.config._retry = true;
       item.resolve(apiClient(item.config));
     }
@@ -82,7 +90,12 @@ apiClient.interceptors.response.use(
       }
 
       useAuthStore.getState().setAccessToken(newAccessToken);
-      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+      
+      if (originalRequest.headers && typeof originalRequest.headers.set === 'function') {
+        originalRequest.headers.set('Authorization', `Bearer ${newAccessToken}`);
+      } else {
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+      }
 
       processQueue(null, newAccessToken);
       return apiClient(originalRequest);
