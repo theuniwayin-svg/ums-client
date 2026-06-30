@@ -97,13 +97,26 @@ export function useUpdateLead(leadId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: unknown) => api.leads.update(leadId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.leads.detail(leadId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['leads', leadId, 'activities'],
-      });
+    onMutate: async (newData: any) => {
+      const queryKey = queryKeys.leads.detail(leadId);
+      await queryClient.cancelQueries({ queryKey });
+      const previousLead = queryClient.getQueryData<Lead>(queryKey);
+      if (previousLead) {
+        queryClient.setQueryData<Lead>(queryKey, {
+          ...previousLead,
+          ...newData,
+        });
+      }
+      return { previousLead };
+    },
+    onError: (err, newData, context) => {
+      if (context?.previousLead) {
+        queryClient.setQueryData(queryKeys.leads.detail(leadId), context.previousLead);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.leads.detail(leadId) });
+      queryClient.invalidateQueries({ queryKey: ['leads', leadId, 'activities'] });
       queryClient.invalidateQueries({ queryKey: queryKeys.leads.all });
     },
   });
@@ -114,13 +127,26 @@ export function useUpdateLeadStatus(leadId: string) {
   return useMutation({
     mutationFn: (data: { version: number; status: string }) =>
       api.leads.updateStatus(leadId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.leads.detail(leadId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['leads', leadId, 'activities'],
-      });
+    onMutate: async (newData) => {
+      const queryKey = queryKeys.leads.detail(leadId);
+      await queryClient.cancelQueries({ queryKey });
+      const previousLead = queryClient.getQueryData<Lead>(queryKey);
+      if (previousLead) {
+        queryClient.setQueryData<Lead>(queryKey, {
+          ...previousLead,
+          status: newData.status,
+        });
+      }
+      return { previousLead };
+    },
+    onError: (err, newData, context) => {
+      if (context?.previousLead) {
+        queryClient.setQueryData(queryKeys.leads.detail(leadId), context.previousLead);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.leads.detail(leadId) });
+      queryClient.invalidateQueries({ queryKey: ['leads', leadId, 'activities'] });
       queryClient.invalidateQueries({ queryKey: queryKeys.leads.all });
     },
   });
@@ -131,13 +157,26 @@ export function useUpdateLeadTemperature(leadId: string) {
   return useMutation({
     mutationFn: (data: { version: number; temperature: string }) =>
       api.leads.updateTemperature(leadId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.leads.detail(leadId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['leads', leadId, 'activities'],
-      });
+    onMutate: async (newData) => {
+      const queryKey = queryKeys.leads.detail(leadId);
+      await queryClient.cancelQueries({ queryKey });
+      const previousLead = queryClient.getQueryData<Lead>(queryKey);
+      if (previousLead) {
+        queryClient.setQueryData<Lead>(queryKey, {
+          ...previousLead,
+          temperature: newData.temperature,
+        });
+      }
+      return { previousLead };
+    },
+    onError: (err, newData, context) => {
+      if (context?.previousLead) {
+        queryClient.setQueryData(queryKeys.leads.detail(leadId), context.previousLead);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.leads.detail(leadId) });
+      queryClient.invalidateQueries({ queryKey: ['leads', leadId, 'activities'] });
       queryClient.invalidateQueries({ queryKey: queryKeys.leads.all });
     },
   });

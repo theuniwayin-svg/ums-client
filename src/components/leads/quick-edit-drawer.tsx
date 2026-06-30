@@ -40,31 +40,24 @@ export function QuickEditDrawer({ open, leadId, onClose }: QuickEditDrawerProps)
   const updateLeadTemperature = useUpdateLeadTemperature(leadId || '');
   const createNote = useCreateNote(leadId || '');
   const [note, setNote] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
 
   const handleStatusChange = async (status: string) => {
     if (!lead) return;
     try {
-      setIsSaving(true);
       await updateLeadStatus.mutateAsync({ version: lead.version, status });
       toast.success('Status updated');
     } catch {
       toast.error('Failed to update status');
-    } finally {
-      setIsSaving(false);
     }
   };
 
   const handleTemperatureChange = async (temperature: string) => {
     if (!lead) return;
     try {
-      setIsSaving(true);
       await updateLeadTemperature.mutateAsync({ version: lead.version, temperature });
       toast.success('Temperature updated');
     } catch {
       toast.error('Failed to update temperature');
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -120,7 +113,7 @@ export function QuickEditDrawer({ open, leadId, onClose }: QuickEditDrawerProps)
                           : 'text-xs'
                       }
                       onClick={() => handleStatusChange(s)}
-                      disabled={isSaving}
+                      disabled={updateLeadStatus.isPending || updateLeadTemperature.isPending}
                     >
                       {s}
                     </Button>
@@ -145,7 +138,7 @@ export function QuickEditDrawer({ open, leadId, onClose }: QuickEditDrawerProps)
                           : ''
                       }
                       onClick={() => handleTemperatureChange(t)}
-                      disabled={isSaving}
+                      disabled={updateLeadTemperature.isPending || updateLeadStatus.isPending}
                     >
                       {t === 'Hot' ? '🔥' : t === 'Warm' ? '☀️' : '❄️'} {t}
                     </Button>

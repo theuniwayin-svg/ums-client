@@ -7,6 +7,8 @@ import { Toaster } from 'sonner';
 import { queryClient } from '@/lib/query-client';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
+import { ProgressProvider } from '@/components/providers/progress-provider';
+
 function ThemeInitializer() {
   useEffect(() => {
     const theme = localStorage.getItem('theme') || 'system';
@@ -28,7 +30,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ThemeInitializer />
-        {children}
+        <ProgressProvider>
+          {children}
+        </ProgressProvider>
         <Toaster position="top-right" richColors />
         {process.env.NODE_ENV === 'development' && (
           <ReactQueryDevtools initialIsOpen={false} />

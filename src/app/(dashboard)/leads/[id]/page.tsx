@@ -431,8 +431,10 @@ export default function LeadDetailPage() {
                     className={cn(
                       'flex-1 sm:flex-none gap-1.5 text-xs h-8 border-2 transition-all',
                       isActive ? cfg.active : cfg.inactive,
+                      updateLeadTemperature.isPending && 'opacity-60 cursor-not-allowed'
                     )}
                     onClick={() => handleTemperatureChange(t)}
+                    disabled={updateLeadTemperature.isPending}
                   >
                     {cfg.icon} {t}
                   </Button>
