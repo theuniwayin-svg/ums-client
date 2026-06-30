@@ -110,7 +110,6 @@ export default function LeadsPage() {
   const [assignedToValue, setAssignedToValue] = useState(activeFilters.assignedTo || '');
   const [assigneeId, setAssigneeId] = useState('');
   const [isShortcutHelpOpen, setIsShortcutHelpOpen] = useState(false);
-  const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState(activeFilters.sortBy || 'updatedAt');
   const [sortOrder, setSortOrder] = useState(activeFilters.order || 'desc');
   const [isFilterOpen, setIsFilterOpen] = useState(true);
@@ -124,16 +123,16 @@ export default function LeadsPage() {
     }
   }, []);
 
+  const page = activeFilters.page || 1;
+  const setPage = (updater: number | ((p: number) => number)) => {
+    const newPage = typeof updater === 'function' ? updater(page) : updater;
+    setFilter('page', newPage);
+  };
+
   const { data, isLoading } = useLeads({ ...activeFilters, page, limit: 20 });
   const leads: Lead[] = data?.data || [];
   const meta = data?.meta || { total: 0, page: 1, limit: 20 };
   const totalPages = Math.ceil(meta.total / meta.limit);
-
-  useEffect(() => {
-    if (activeFilters.page && activeFilters.page !== page) {
-      setPage(activeFilters.page);
-    }
-  }, [activeFilters.page, page]);
 
   useEffect(() => {
     setSearchValue(activeFilters.q || '');
@@ -966,7 +965,7 @@ function MobileLeadsList({
   page: number;
   totalPages: number;
   meta: { total: number; page: number; limit: number };
-  onPageChange: React.Dispatch<React.SetStateAction<number>>;
+  onPageChange: (updater: number | ((p: number) => number)) => void;
   isAdmin: boolean;
   staffUsers: any[];
 }) {

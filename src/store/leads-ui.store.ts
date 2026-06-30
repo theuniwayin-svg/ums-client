@@ -74,7 +74,11 @@ export const useLeadsUiStore = create<LeadsUiState>()(
 
       setFilter: (key, value) =>
         set((state) => ({
-          activeFilters: { ...state.activeFilters, [key]: value, page: 1 },
+          activeFilters: { 
+            ...state.activeFilters, 
+            [key]: value, 
+            page: key === 'page' ? (value as number) : 1 
+          },
         })),
 
       setFilters: (filters) =>
@@ -100,8 +104,11 @@ export const useLeadsUiStore = create<LeadsUiState>()(
     }),
     {
       name: 'leads-ui',
-      // Only persist column visibility
-      partialize: (state) => ({ columnVisibility: state.columnVisibility }),
+      // Persist column visibility and active filters
+      partialize: (state) => ({ 
+        columnVisibility: state.columnVisibility,
+        activeFilters: state.activeFilters
+      }),
     },
   ),
 );
