@@ -1133,6 +1133,24 @@ function MobileLeadsList({
                     </button>
                   </div>
                 </div>
+
+                {/* Row 3: course + latest note */}
+                {(lead.course || lead.latestNote) && (
+                  <div className="mt-2 pt-2 border-t border-border/50 space-y-1">
+                    {lead.course && (
+                      <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <span className="font-medium text-foreground/70">Course:</span>
+                        <span className="truncate">{lead.course}</span>
+                      </p>
+                    )}
+                    {lead.latestNote && (
+                      <p className="text-[10px] text-muted-foreground flex items-start gap-1 leading-tight">
+                        <span className="font-medium text-foreground/70 flex-shrink-0">Note:</span>
+                        <span className="truncate italic">&ldquo;{lead.latestNote.content}&rdquo;</span>
+                      </p>
+                    )}
+                  </div>
+                )}
               </motion.div>
             );
           })

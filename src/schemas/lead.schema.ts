@@ -81,6 +81,11 @@ export interface Lead {
     isCompleted: boolean;
     completedAt?: string;
   };
+  latestNote?: {
+    content: string;
+    createdByName: string;
+    createdAt: string;
+  };
   version: number;
   isDeleted: boolean;
   createdBy: { _id: string; name: string; email: string } | string;
